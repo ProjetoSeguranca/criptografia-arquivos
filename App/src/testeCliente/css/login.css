@@ -1,0 +1,26 @@
+.box{
+    width:290px;
+    height:180px;
+top: 200px;
+    position:relative;
+    margin: auto auto auto auto;
+    background-color: invisible
+}	
+.box2{
+width:70px;
+    height:30px;
+    position:relative;
+    margin: auto auto auto 50px;
+top: 30px;
+    background-color: invisible
+}
+.box3{
+width:80px;
+    height:30px;
+    position:relative;
+    margin: auto auto auto 120px;
+    background-color: invisible
+}
+body{
+background-color: #e6e6e6
+}

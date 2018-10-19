@@ -1,0 +1,12 @@
+body{
+    background-color: #e6e6e6
+}
+
+.box{
+    width:300px;
+    height:180px;
+    top: 200px;
+    position:relative;
+    margin: auto auto auto auto;
+    background-color: invisible
+}

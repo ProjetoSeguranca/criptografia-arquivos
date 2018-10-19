@@ -58,7 +58,7 @@ const encryptData = function (data) {
 // }
 
 const getPublicKey = function (sendKey) {
-    fetch(`/criptografia-arquivos/App/src/testeCliente/public_key.php`)
+    fetch(`/criptografia-arquivos/App/src/testeCliente/rotas/public_key.php`)
         .then(
             function (response) {
                 if (response.status !== 200) {
@@ -80,7 +80,7 @@ const getPublicKey = function (sendKey) {
 
 const sendAESKey = function () {
     clientkey = makeClientKey()
-    fetch('/criptografia-arquivos/App/src/testeCliente/getclientkey.php', {
+    fetch('/criptografia-arquivos/App/src/testeCliente/rotas/getclientkey.php', {
         method: 'post',
         headers: {
             "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"

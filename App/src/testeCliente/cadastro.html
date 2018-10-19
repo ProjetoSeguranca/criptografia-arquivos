@@ -5,35 +5,41 @@
 	<meta charset="utf-8">
 	<title>Cadastro</title>
 	<link rel="stylesheet" href="./css/cadastro.css">
+	<script src="./js/cadastro.js"></script>
+	<script src="./js/handshake.js"></script>
+	<script src="./crypto-js/crypto-js.js"></script>
+	<script src="./jsencrypt/bin/jsencrypt.min.js"></script>
 </head>
 
 <body>
 	<div class=box>
 		<h1>Cadastro</h1>
-		<fieldset>
+		<form action="rotas/cadastrar.php" method="post" onsubmit="return validar(this)">
+			<fieldset>
 
-			<div class="login-user">
-				<label for="userLogin">Usuario</label>
-				<input class="userLogin" id="userLogin" aria-label="Usuario" placeholder="Usuario">
-			</div>
-			<div class="password">
-				<label for="userPassword">Senha</label>
-				<input class="userPassword" id="userPassword" type="password" aria-label="Senha" placeholder="Senha">
-			</div>
-			<div class="password">
-				<label for="userConfirmPassword">Confirmar Senha</label>
-				<input class="userConfirmPassword" id="userConfirmPassword" type="password" aria-label="Confirmar Senha"
-				 placeholder="Confirmar Senha">
-			</div>
-			<div class="email">
-				<label for="userEmail">E-mail</label>
-				<input class="userEmail" id="userEmail" aria-label="E-mail" placeholder="E-mail">
-			</div>
+				<div class="login-user">
+					<label for="userLogin">Usuario</label>
+					<input class="userLogin" id="userLogin" name="userLogin" aria-label="Usuario" placeholder="Usuario">
+				</div>
+				<div class="password">
+					<label for="userPassword">Senha</label>
+					<input class="userPassword" id="userPassword" name="userPassword" type="password" aria-label="Senha" placeholder="Senha">
+				</div>
+				<div class="password">
+					<label for="userConfirmPassword">Confirmar Senha</label>
+					<input class="userConfirmPassword" id="userConfirmPassword" type="password" aria-label="Confirmar Senha"
+					 placeholder="Confirmar Senha">
+				</div>
+				<div class="email">
+					<label for="userEmail">E-mail</label>
+					<input class="userEmail" id="userEmail" name="userEmail" aria-label="E-mail" placeholder="E-mail">
+				</div>
 
-			<input type="submit" value="Cadastrar" class="btn">
-			<p class="Cadastrar"></p>
+				<input type="submit" value="Cadastrar" class="btn">
+				<p class="Cadastrar"></p>
 
-		</fieldset>
+			</fieldset>
+		</form>
 	</div>
 </body>
 

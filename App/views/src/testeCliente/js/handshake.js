@@ -1,5 +1,5 @@
 /**
- * Esta função gera uma chave AES de 32 bytes.
+ * Esta função gera uma chave AES aleatório de 32 bytes.
  */
 const makeClientKey = function () {
     var text = "";
@@ -11,6 +11,11 @@ const makeClientKey = function () {
     return text;
 }
 
+/**
+ * Está função encripta dados de login e senha, gerando randomicamente 
+ * um vetor de inicialização, além de utilizar o método salt para a
+ * definizaçõ da chave AES de criptografia.
+ */
 function CryptoJSAESEncrypt(login, pass) {
 
     var salt = CryptoJS.lib.WordArray.random(256);

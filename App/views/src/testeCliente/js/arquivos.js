@@ -1,8 +1,16 @@
+//ESTE ARQUIVO AINDA ESTÁ EM DESENVOLVIMENTO
+
+/**
+ * 
+ */
 window.onload = function () {
     getPublicKey(sendAESKey)
     cryptoFile(getFileInfo)
 }
 
+/**
+ * Está função criptografa os arquivos antes de serem enviados ao servidor.
+ */
 const cryptoFile = function (callback) {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
         var fileSelected = document.getElementById('file');
@@ -31,10 +39,18 @@ const cryptoFile = function (callback) {
     }
 }
 
+/**
+ * Esta função é utiliada como callback na função "cryptoFile" para
+ * salvar em uma variavel os dados do arquivo que foi criptografado.
+ */
 const getFileInfo = function (data) {
     window.fileEncrypt = data
 }
 
+/**
+ * Está função será responsável por enviar os arquivos criptografados ao
+ * servidor de arquivos.
+ */
 const sendFile = function () {
     console.log(window.fileEncrypt)
     if (window.fileEncrypt) {

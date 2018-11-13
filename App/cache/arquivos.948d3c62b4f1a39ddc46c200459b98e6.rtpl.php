@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php if(!class_exists('Rain\Tpl')){exit;}?><!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -45,7 +45,7 @@
   <div class="container">
     <div class="jumbotron">
       <h1>Bem-vindo!</h1>
-      <p>Olá, {$data.user}.</p>
+      <p>Olá, <?php echo htmlspecialchars( $data["user"], ENT_COMPAT, 'UTF-8', FALSE ); ?>.</p>
     </div>
     <div id="divAlert" class="alert fade in">
       <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>

@@ -106,7 +106,6 @@ const sendAESKey = function () {
             console.log('Request succeeded to client key');
             console.log('Cliente key AES: ', window.clientkey)
             console.log('Public key RSA: ', window.publickey)
-            console.log('Vetor do AES: ', window.vi)
         })
         .catch(function (error) {
             console.log('Request failed', error);

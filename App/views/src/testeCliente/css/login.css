@@ -1,26 +1,25 @@
-.box{
-    width:290px;
-    height:180px;
-top: 200px;
-    position:relative;
-    margin: auto auto auto auto;
-    background-color: invisible
-}	
-.box2{
-width:70px;
-    height:30px;
-    position:relative;
-    margin: auto auto auto 50px;
-top: 30px;
-    background-color: invisible
+body {
+    background: #CCC;
 }
-.box3{
-width:80px;
-    height:30px;
-    position:relative;
-    margin: auto auto auto 120px;
-    background-color: invisible
+
+.formLogin{
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-body{
-background-color: #e6e6e6
+
+.row{
+    width: 300px;
+}
+
+input[type="text"]{
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.btn{
+    width: 100%;
+    margin-bottom: 5px;
+    text-transform:uppercase;
 }

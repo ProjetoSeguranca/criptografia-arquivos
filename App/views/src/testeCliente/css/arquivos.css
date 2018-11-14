@@ -8,6 +8,9 @@ body {
 
 .arquivos h1 {
     margin: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+    text-transform: uppercase;
 }
 
 .arquivos{
@@ -71,6 +74,10 @@ body {
     margin-bottom: 10px;
 }
 
+#formCompart input[type="text"]{
+    font-weight: bold;
+}
+
 .cabecalho button{
     height: 20px;
 }
@@ -130,8 +137,37 @@ table {
     background-color: #FFF;
 }
 
+table tr th {
+    width: 16.66%;
+}
+
 .formEnviar{
     display: flex;
+    flex-wrap: wrap;
     justify-content: left;
     margin-bottom: 10px;
+}
+
+@media(max-width: 768px){
+    table tr th{
+        width: 33.33%;
+    }
+    .formEnviar input{
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    .ocultar{
+        display: none;
+    }
+
+    #tableFilesData tr td:nth-child(2){
+        display: none;
+    }
+    #tableFilesData tr td:nth-child(3){
+        display: none;
+    }
+    #tableFilesData tr td:nth-child(4){
+        display: none;
+    }
 }

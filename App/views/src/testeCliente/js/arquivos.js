@@ -15,7 +15,7 @@ function alertSend(mensagem, tipo) {
     divAlert.classList.add(tipo)
     divAlert.style.display = 'block'
     divAlert.insertAdjacentHTML('beforeend', `${mensagem}<br>`)
-    setInterval(() => {
+    setTimeout(() => {
         divAlert.style.display = 'none'
         divAlert.innerHTML = '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'
         divAlert.classList.remove(tipo)
@@ -44,6 +44,7 @@ const openModalCompartilhar = function (flag = true, e) {
     const modal = document.getElementById('compartilhar')
     const box = document.getElementById('formCompart')
     if (flag == true) {
+        getUsers()
         insetDataFilesShare()
         modal.style.zIndex = '2000'
         box.style.display = 'block'
@@ -53,12 +54,50 @@ const openModalCompartilhar = function (flag = true, e) {
     }
 }
 
+const getUsers = function () {
+    // fetch('/listar/usuarios')
+    //     .then(data => {
+    //         if (data.status < 300 && data.status >= 200) {
+    //             return data.text()
+    //         } else {
+    //             throw true
+    //         }
+    //     })
+    //     .then(usuarios => {
+    //         window.usuarios = JSON.parse(usuarios)
+    //     })
+    //     .catch((error) => {
+    //         alertSend(`<strong>Erro! </strong>Falha ao checar lista de usuarios.`, 'alert-danger')
+    //         openModalLoad(false)
+    //     })
+}
+
+const validarUser = function () {
+    // let flag = false
+    // const element = document.getElementById('loginCompart')
+    // element.style.color = 'red'
+    // window.usuarios.forEach(e => {
+    //     if (element.value == e) {
+    //         element.style.color = 'green'
+    //         flag = true
+    //         return
+    //     }
+    // })
+    // if(flag == true){
+    //     return true
+    // } else {
+    //     return false
+    // }
+    return true
+}
+
 const openModalSolicitacao = function (data, flag = true) {
     const modal = document.getElementById('solicitacao')
     const box = document.getElementById('formSolicitacao')
     const pMsg = document.getElementById('msgSolicitacao')
     if (flag == true) {
         if (data.existe == true) {
+            window.checar = false
             pMsg.innerHTML = `<strong>${data.user}</strong>, gostaria de compartilhar o arquivo <strong>${data.arquivo}</strong> com você.`
             modal.style.zIndex = '2000'
             box.style.display = 'block'
@@ -240,19 +279,25 @@ const insetDataFilesShare = function () {
 }
 
 const checarSolicitacao = function () {
-    fetch('/compartilhar/arquivo/checar')
-        .then(data => {
-            if (data.status < 300 && data.status >= 200) {
-                return data.text()
-            }
-        })
-        .then(retorno => {
-            const r = JSON.parse(retorno)
-            openModalSolicitacao(r)
-        })
+    window.checar = true
+    setInterval(() => {
+        if (window.checar == true) {
+            fetch('/compartilhar/arquivo/checar')
+                .then(data => {
+                    if (data.status < 300 && data.status >= 200) {
+                        return data.text()
+                    }
+                })
+                .then(retorno => {
+                    const r = JSON.parse(retorno)
+                    openModalSolicitacao(r)
+                })
+        }
+    }, 5000)
 }
 
 const solicitacaoCompart = function (flag = true) {
+    window.checar = true
     const modal = document.getElementById('solicitacao')
     const box = document.getElementById('formSolicitacao')
     box.style.display = 'none'
@@ -277,7 +322,7 @@ const transUserToUser = function (idCompart) {
             checkRespJSONServer(retorno, `Arquivo salvo`)
             getFilesUser()
         })
-        .catch((error)=>{
+        .catch((error) => {
             alertSend(`<strong>Erro! </strong>Falha ao salvar arquivo`, 'alert-danger')
         })
 }
@@ -294,7 +339,7 @@ const deleteCompart = function (idCompart) {
         .then(retorno => {
             checkRespJSONServer(retorno, `Solicitação recusada`)
         })
-        .catch((error)=>{
+        .catch((error) => {
             alertSend(`<strong>Erro! </strong>Falha ao enviar dados para o servidor`, 'alert-danger')
         })
 }
@@ -318,6 +363,7 @@ const sendCompartilhamento = function (e) {
                 }
             })
             .then(retorno => {
+                openModalCompartilhar(false, e)
                 checkRespJSONServer(retorno, `Arquivo compartilhado`)
             })
             .catch((error) => {
@@ -341,6 +387,10 @@ const validarFormCompart = function (loginCompart, fileCompart) {
     })
     if (!flag) {
         alert('Selecione um arquivo')
+        return false
+    }
+    if(!validarUser()){
+        alert('Informe um usuário válido')
         return false
     }
     return true

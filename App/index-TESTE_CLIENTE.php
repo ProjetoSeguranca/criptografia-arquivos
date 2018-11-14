@@ -69,6 +69,15 @@ $app->get('/listar/arquivos', function(){
 	}
 });
 
+$app->get('/listar/usuarios', function(){
+	return json_encode(array(
+		"camila",
+		"renan",
+		"canderley",
+		"admin"
+	));
+});
+
 $app->delete('/arquivo/delete/{identificacao}', function(){
 	return json_encode(array(
 		"msg" => "Sucesso"
@@ -98,7 +107,7 @@ $app->post('/compartilhar/arquivo/aceitar', function(){
 
 $app->get('/compartilhar/arquivo/checar', function(){
 	$retorno = array(
-		"existe" => true,
+		"existe" => false, // <--- TESTAR NOTIFICAÇÕES = TRUE
 		"user" => "mirgs1234",
 		"arquivo" => "trabalhoSeg.pptx"
 	);

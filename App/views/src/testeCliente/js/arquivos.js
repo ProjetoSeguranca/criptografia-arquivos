@@ -7,13 +7,14 @@ window.onload = function () {
     getPublicKey(sendAESKey)
     cryptoFile(getFileInfo)
     getFilesUser()
+    checarSolicitacao()
 }
 
 function alertSend(mensagem, tipo) {
     const divAlert = document.getElementById('divAlert')
     divAlert.classList.add(tipo)
     divAlert.style.display = 'block'
-    divAlert.insertAdjacentHTML('beforeend', `${mensagem}`)
+    divAlert.insertAdjacentHTML('beforeend', `${mensagem}<br>`)
     setInterval(() => {
         divAlert.style.display = 'none'
         divAlert.innerHTML = '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'
@@ -24,7 +25,6 @@ function alertSend(mensagem, tipo) {
 function openModalLoad(flag, msg = `<p>Aguarde...</p>`) {
     const modal = document.getElementById('carregamento')
     const box = document.getElementById('barraDiv')
-
     if (flag == true) {
         box.innerHTML = msg
         modal.style.zIndex = '2000'
@@ -34,6 +34,50 @@ function openModalLoad(flag, msg = `<p>Aguarde...</p>`) {
             box.style.display = 'none'
             modal.style.zIndex = '-1'
         }, 1000)
+    }
+}
+
+const openModalCompartilhar = function (flag = true, e) {
+    if (e) {
+        e.preventDefault()
+    }
+    const modal = document.getElementById('compartilhar')
+    const box = document.getElementById('formCompart')
+    if (flag == true) {
+        insetDataFilesShare()
+        modal.style.zIndex = '2000'
+        box.style.display = 'block'
+    } else {
+        box.style.display = 'none'
+        modal.style.zIndex = '-1'
+    }
+}
+
+const openModalSolicitacao = function (data, flag = true) {
+    const modal = document.getElementById('solicitacao')
+    const box = document.getElementById('formSolicitacao')
+    const pMsg = document.getElementById('msgSolicitacao')
+    if (flag == true) {
+        if (data.existe == true) {
+            pMsg.innerHTML = `<strong>${data.user}</strong>, gostaria de compartilhar o arquivo <strong>${data.arquivo}</strong> com você.`
+            modal.style.zIndex = '2000'
+            box.style.display = 'block'
+        }
+    } else {
+        pMsg.innerHTML = ''
+        box.style.display = 'none'
+        modal.style.zIndex = '-1'
+    }
+}
+
+const checkRespJSONServer = function (retorno, msg) {
+    const r = JSON.parse(retorno)
+    if (r.msg === 'Sucesso') {
+        alertSend(`<strong>Sucesso! </strong>${msg}`, 'alert-success')
+        openModalLoad(false)
+        return
+    } else {
+        throw true
     }
 }
 
@@ -94,19 +138,15 @@ const sendFile = function () {
                 if (data.status < 300 && data.status >= 200) {
                     return data.text()
                 } else {
-                    alertSend(`<strong>Erro! </strong>Falha ao enviar o arquivo. Erro ${error.status}`, 'alert-danger')
+                    throw true
                 }
             }).then(retorno => {
-                const r = JSON.parse(retorno)
-                if (r.msg === 'Sucesso') {
-                    alertSend(`<strong>Sucesso! </strong>Arquivo enviado com sucesso`, 'alert-success')
-                }
+                checkRespJSONServer(retorno, `Arquivo salvo com sucesso`)
             })
-            .catch((error)=>{
+            .catch((error) => {
                 alertSend(`<strong>Erro! </strong>Falha ao enviar arquivo do usuário.`, 'alert-danger')
                 openModalLoad(false)
             })
-        openModalLoad(false)
         getFilesUser()
     } else {
         alertSend('<strong>Atenção! </strong>Nenhum arquivo foi selecionado para envio', 'alert-warning')
@@ -121,16 +161,12 @@ const deleteFile = function (e, id) {
                 if (data.status < 300 && data.status >= 200) {
                     return data.text()
                 } else {
-                    alertSend(`<strong>Erro! </strong>Falha ao excluir arquivo. Erro ${error.status}`, 'alert-danger')
+                    throw true
                 }
             }).then(retorno => {
-                const r = JSON.parse(retorno)
-                if (r.msg === 'Sucesso') {
-                    alertSend(`<strong>Sucesso! </strong>Arquivo excluido com sucesso`, 'alert-success')
-                    getFilesUser()
-                }
+                checkRespJSONServer(retorno, `Arquivo excluido com sucesso`)
             })
-            .catch((error)=>{
+            .catch((error) => {
                 alertSend(`<strong>Erro! </strong>Falha ao excluir arquivo do usuário.`, 'alert-danger')
                 openModalLoad(false)
             })
@@ -144,16 +180,15 @@ const getFilesUser = function () {
             if (resp.status < 300 && resp.status >= 200) {
                 return resp.text()
             } else {
-                alertSend(`<strong>Erro! </strong>Falha ao obter arquivos do usuário. Erro ${error.status}`, 'alert-danger')
                 throw true
             }
         })
         .then(data => {
-            const files = JSON.parse(data)
-            insetDataFilesTable(files)
+            window.files = JSON.parse(data)
+            insetDataFilesTable(window.files)
             openModalLoad(false)
         })
-        .catch((error)=>{
+        .catch((error) => {
             alertSend(`<strong>Erro! </strong>Falha ao obter arquivos do usuário.`, 'alert-danger')
             openModalLoad(false)
         })
@@ -188,4 +223,125 @@ const insetDataFilesTable = function (files) {
     rows.forEach(linha => {
         tbody.appendChild(linha)
     })
+}
+
+const insetDataFilesShare = function () {
+    const lista = document.getElementById('listaArquivos')
+    lista.innerHTML = ''
+    const files = Array.from(window.files)
+    const spans = files.map((file) => {
+        const span = document.createElement('span')
+        span.innerHTML = `<span><input type="radio" name="fileCompart" value="${file.name}">${file.name}</span>`
+        return span
+    })
+    spans.forEach(span => {
+        lista.appendChild(span)
+    })
+}
+
+const checarSolicitacao = function () {
+    fetch('/compartilhar/arquivo/checar')
+        .then(data => {
+            if (data.status < 300 && data.status >= 200) {
+                return data.text()
+            }
+        })
+        .then(retorno => {
+            const r = JSON.parse(retorno)
+            openModalSolicitacao(r)
+        })
+}
+
+const solicitacaoCompart = function (flag = true) {
+    const modal = document.getElementById('solicitacao')
+    const box = document.getElementById('formSolicitacao')
+    box.style.display = 'none'
+    modal.style.zIndex = '-1'
+    if (flag == true) {
+        transUserToUser(123123)
+    } else {
+        deleteCompart(123123)
+    }
+}
+
+const transUserToUser = function (idCompart) {
+    fetch('/compartilhar/arquivo/aceitar', { method: 'post', body: `{"id": "${idCompart}"}` })
+        .then(data => {
+            if (data.status < 300 && data.status >= 200) {
+                return data.text()
+            } else {
+                throw true
+            }
+        })
+        .then(retorno => {
+            checkRespJSONServer(retorno, `Arquivo salvo`)
+            getFilesUser()
+        })
+        .catch((error)=>{
+            alertSend(`<strong>Erro! </strong>Falha ao salvar arquivo`, 'alert-danger')
+        })
+}
+
+const deleteCompart = function (idCompart) {
+    fetch('/compartilhar/arquivo/negar', { method: 'post', body: `{"id": "${idCompart}"}` })
+        .then(data => {
+            if (data.status < 300 && data.status >= 200) {
+                return data.text()
+            } else {
+                throw true
+            }
+        })
+        .then(retorno => {
+            checkRespJSONServer(retorno, `Solicitação recusada`)
+        })
+        .catch((error)=>{
+            alertSend(`<strong>Erro! </strong>Falha ao enviar dados para o servidor`, 'alert-danger')
+        })
+}
+
+const sendCompartilhamento = function (e) {
+    e.preventDefault()
+    const loginCompart = document.getElementById('loginCompart')
+    const fileCompart = document.getElementsByName('fileCompart')
+    if (validarFormCompart(loginCompart, fileCompart)) {
+        const dados = {
+            login: CryptoJS.AES.encrypt(loginCompart.value, window.clientkey).toString(),
+            arquivo: CryptoJS.AES.encrypt(fileCompart.value, window.clientkey).toString()
+        }
+        fetch('/compartilhar/arquivo', {
+            method: 'post',
+            body: JSON.stringify(dados)
+        })
+            .then(data => {
+                if (data.status < 300 && data.status >= 200) {
+                    return data.text()
+                }
+            })
+            .then(retorno => {
+                checkRespJSONServer(retorno, `Arquivo compartilhado`)
+            })
+            .catch((error) => {
+                openModalCompartilhar(false)
+                alertSend(`<strong>Erro! </strong>Falha ao compartilhar arquivo`, 'alert-danger')
+            })
+    }
+}
+
+const validarFormCompart = function (loginCompart, fileCompart) {
+    if (loginCompart.value.trim() == '') {
+        loginCompart.focus();
+        alert('Informe para quem enviar o arquivo')
+        return false
+    }
+    let flag = false
+    fileCompart.forEach(e => {
+        if (e.checked) {
+            flag = true
+        }
+    })
+    if (!flag) {
+        alert('Selecione um arquivo')
+        return false
+    }
+    return true
 }

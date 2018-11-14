@@ -58,7 +58,7 @@ const encryptAESClient = function (data) {
  * está sendo usado pelo clientepara o servidor.
  */
 const getPublicKey = function (callback) {
-    fetch(`http://www.projetoseguranca.com.br/keyencodeserver`) // <---- mudar
+    fetch(`keyencodeserver`) // <---- mudar
         .then(
             function (response) {
                 if (response.status !== 200) {
@@ -91,7 +91,7 @@ const sendAESKey = function () {
     //console.log("palavra  : ",encryptedWord);
     const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
     const hashKey = CryptoJS.SHA256(encrypted).toString()
-    fetch('http://www.projetoseguranca.com.br/keyencodecliente', { // <---- mudar
+    fetch('keyencodecliente', { // <---- mudar
         method: 'post',
         headers: {
             "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"

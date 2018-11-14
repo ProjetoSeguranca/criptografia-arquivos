@@ -75,6 +75,36 @@ $app->delete('/arquivo/delete/{identificacao}', function(){
 	));
 });
 
+$app->post('/compartilhar/arquivo', function(){
+	$retorno = array(
+		'msg' => "Sucesso"
+	);
+	return json_encode($retorno);
+});
+
+$app->post('/compartilhar/arquivo/negar', function(){
+	$retorno = array(
+		'msg' => "Sucesso"
+	);
+	return json_encode($retorno);
+});
+
+$app->post('/compartilhar/arquivo/aceitar', function(){
+	$retorno = array(
+		'msg' => "Sucesso"
+	);
+	return json_encode($retorno);
+});
+
+$app->get('/compartilhar/arquivo/checar', function(){
+	$retorno = array(
+		"existe" => true,
+		"user" => "mirgs1234",
+		"arquivo" => "trabalhoSeg.pptx"
+	);
+	return json_encode($retorno);
+});
+
 //gera um json com a chave publica que será usada no Cliente
 $app->get('/keyencodeserver',function(Requests $request,Response $response,array $args){
 	

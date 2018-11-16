@@ -27,7 +27,9 @@ const clearFields = function () {
  * Esta função faz a validação dos dados inseridos no formulário de
  * cadastro antes de enviar para o servidor.
  */
-const validar = function (e) {
+const validar = function (event) {
+    event.preventDefault()
+    
     const inputLogin = document.getElementById('userLogin')
     const inputPass = document.getElementById('userPassword')
     const inputConfPass = document.getElementById('userConfirmPassword')
@@ -35,32 +37,54 @@ const validar = function (e) {
 
     if (inputLogin.value.trim() == '') {
         alert("O login deve ser informado")
-        return false;
+        return;
     }
     if (inputPass.value.trim() == '') {
         alert("A senha deve ser informada")
-        return false;
+        return;
     }
     if (inputConfPass.value.trim() == '') {
         alert("A senha de confirmação deve ser informada")
-        return false;
+        return;
     } else {
         if (inputPass.value != inputConfPass.value) {
             alert("As senhas não batem")
-            return false;
+            return;
         }
     }
     if (inputEmail.value.trim() == '') {
         alert("O e-mail deve ser informado")
-        return false;
+        return;
     }
 
-    let criptLogin = CryptoJS.AES.encrypt(inputLogin.value, window.clientkey)
-    let criptPass = CryptoJS.AES.encrypt(inputPass.value, window.clientkey)
-    let criptEmail = CryptoJS.AES.encrypt(inputEmail.value, window.clientkey)
-    inputLogin.value = criptLogin.toString()
-    inputPass.value = criptPass.toString()
-    inputEmail.value = criptEmail.toString()
-    inputConfPass.value = ''
-    return true
+    const data = {
+        login: inputLogin.value,
+        pass: inputPass.value,
+        email: inputEmail.value
+    }
+    cadastrarUsuario(data)
+}
+
+const cadastrarUsuario = function(data){
+    fetch('/usuario/novo', {
+        method: 'post',
+        body: `data=${CryptoJS.AES.encrypt(JSON.stringify(data), window.clientkey)}`
+    })
+    .then(response => {
+        if(response.status < 300 && response.status >= 200){
+            return response.text()
+        } else {
+            throw true
+        }
+    })
+    .then(resp => {
+        const r = JSON.parse(resp)
+        if(r.msg == 'Sucesso'){
+            alert('Usuário cadastrado com sucesso')
+            window.location.href = '/'
+        }
+    })
+    .catch(err => {
+        alert('Erro. Não foi possível cadastrar o usuário')
+    })
 }

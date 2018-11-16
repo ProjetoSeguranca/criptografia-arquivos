@@ -56,6 +56,12 @@ $app->get('/novocadastro', function(){
     $page->setTpl("cadastro");
 });
 
+$app->post('/usuario/novo', function(){
+	return json_encode(array(
+		"msg" => "Sucesso"
+	));
+});
+
 $app->post('/upload', function(){
 	$retorno = array(
 		'msg' => "Sucesso"
@@ -78,7 +84,7 @@ $app->get('/listar/usuarios', function(){
 	));
 });
 
-$app->delete('/arquivo/delete/{identificacao}', function(){
+$app->delete('/arquivo/delete/', function(){
 	return json_encode(array(
 		"msg" => "Sucesso"
 	));
@@ -107,7 +113,8 @@ $app->post('/compartilhar/arquivo/aceitar', function(){
 
 $app->get('/compartilhar/arquivo/checar', function(){
 	$retorno = array(
-		"existe" => false, // <--- TESTAR NOTIFICAÇÕES = TRUE
+		"existe" => true, // <--- TESTAR NOTIFICAÇÕES = TRUE
+		"idConvite" => 1,
 		"user" => "mirgs1234",
 		"arquivo" => "trabalhoSeg.pptx"
 	);

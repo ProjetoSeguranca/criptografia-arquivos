@@ -95,10 +95,13 @@ const openModalSolicitacao = function (data, flag = true) {
     const modal = document.getElementById('solicitacao')
     const box = document.getElementById('formSolicitacao')
     const pMsg = document.getElementById('msgSolicitacao')
+    const idSolicitacao = document.getElementById('idSolicitacao')
+
     if (flag == true) {
         if (data.existe == true) {
             window.checar = false
             pMsg.innerHTML = `<strong>${data.user}</strong>, gostaria de compartilhar o arquivo <strong>${data.arquivo}</strong> com você.`
+            idSolicitacao.value = data.idConvite
             modal.style.zIndex = '2000'
             box.style.display = 'block'
         }
@@ -171,7 +174,7 @@ const sendFile = function () {
         clientkey = makeClientKey()
         fetch('/upload', {
             method: 'post',
-            body: `file=${JSON.stringify(window.fileEncrypt)}`
+            body: `data=${JSON.stringify(window.fileEncrypt)}`
         })
             .then(function (data) {
                 if (data.status < 300 && data.status >= 200) {
@@ -195,7 +198,7 @@ const sendFile = function () {
 const deleteFile = function (e, id) {
     if (confirm('Confirmar exclusão do arquivo?')) {
         e.preventDefault()
-        fetch(`/arquivo/delete/${id}`, { method: 'delete' })
+        fetch(`/arquivo/delete/`, { method: 'delete', body: `data={"id": "${CryptoJS.AES.encrypt(id, window.clientkey).toString()}"}` })
             .then(function (data) {
                 if (data.status < 300 && data.status >= 200) {
                     return data.text()
@@ -300,17 +303,19 @@ const solicitacaoCompart = function (flag = true) {
     window.checar = true
     const modal = document.getElementById('solicitacao')
     const box = document.getElementById('formSolicitacao')
+    const idSolicitacao = document.getElementById('idSolicitacao')
+
     box.style.display = 'none'
     modal.style.zIndex = '-1'
     if (flag == true) {
-        transUserToUser(123123)
+        transUserToUser(idSolicitacao.value)
     } else {
-        deleteCompart(123123)
+        deleteCompart(idSolicitacao.value)
     }
 }
 
 const transUserToUser = function (idCompart) {
-    fetch('/compartilhar/arquivo/aceitar', { method: 'post', body: `{"id": "${idCompart}"}` })
+    fetch('/compartilhar/arquivo/aceitar', { method: 'post', body: `data={"id": "${CryptoJS.AES.encrypt(idCompart, window.clientkey).toString()}"}` })
         .then(data => {
             if (data.status < 300 && data.status >= 200) {
                 return data.text()
@@ -328,7 +333,7 @@ const transUserToUser = function (idCompart) {
 }
 
 const deleteCompart = function (idCompart) {
-    fetch('/compartilhar/arquivo/negar', { method: 'post', body: `{"id": "${idCompart}"}` })
+    fetch('/compartilhar/arquivo/negar', { method: 'post', body: `data={"id": "${CryptoJS.AES.encrypt(idCompart, window.clientkey).toString()}"}` })
         .then(data => {
             if (data.status < 300 && data.status >= 200) {
                 return data.text()
@@ -355,7 +360,7 @@ const sendCompartilhamento = function (e) {
         }
         fetch('/compartilhar/arquivo', {
             method: 'post',
-            body: JSON.stringify(dados)
+            body: `data=${CryptoJS.AES.encrypt(JSON.stringify(dados), window.clientkey).toString()}`
         })
             .then(data => {
                 if (data.status < 300 && data.status >= 200) {

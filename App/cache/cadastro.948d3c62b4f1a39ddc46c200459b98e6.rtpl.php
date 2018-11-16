@@ -23,7 +23,7 @@
 	<div class="formLogin">
 		<div class="row">
 			<div class="col">
-				<form action="#" name="formLogin" id="formLogin" method="post" onsubmit="return validar(this)">
+				<form name="formLogin" id="formLogin" method="post">
 					<h1>Novo usuário</h1>
 					<div class="form-group">
 						<input type="text" class="form-control" id="userLogin" name="userLogin" placeholder="Usuario">
@@ -32,7 +32,7 @@
 						<input type="text" class="form-control" id="userEmail" name="userEmail" placeholder="E-mail">
 					</div>
 					<div class="form-group">
-						<input class="btn btn-primary" type="submit" value="Criar usuário">
+						<input class="btn btn-primary" type="button" onclick="validar(event)" value="Criar usuário">
 						<a class="btn btn-success" href="/" title="Voltar">Voltar</a>
 					</div>
 				</form>

@@ -29,95 +29,10 @@ $app->get('/',function(){
 	extract($rsa->createKey());
 	$_SESSION['optionPublic'] = $publickey;
 	$_SESSION['optionPrivate'] = $privatekey;
-	$_SESSION["arquivos"] = array(
-		array(
-			"name" => "Arquivo 1",
-			"modificationData" => "2018-12-10",
-			"type" => "file",
-			"ext" => "jpeg",
-			"size" => "1234234"
-		),
-		array(
-			"name" => "Arquivo 2",
-			"modificationData" => "2018-12-10",
-			"type" => "file",
-			"ext" => "jpeg",
-			"size" => "1234234"
-		)
-	);
 	
 	$page = new Page();
 
     $page->setTpl("login");
-});
-
-$app->get('/novocadastro', function(){
-	$page = new Page();
-    $page->setTpl("cadastro");
-});
-
-$app->post('/usuario/novo', function(Requests $request){
-	return json_encode(array(
-		"msg" => "Sucesso"
-	));
-});
-
-$app->post('/upload', function(){
-	return json_encode(array(
-		"msg" => "Sucesso"
-	));
-});
-
-$app->get('/listar/arquivos', function(){
-	if($_SESSION["arquivos"] != null){
-		return json_encode($_SESSION["arquivos"]);
-	}
-});
-
-$app->get('/listar/usuarios', function(){
-	return json_encode(array(
-		"camila",
-		"renan",
-		"canderley",
-		"admin"
-	));
-});
-
-$app->delete('/arquivo/delete/', function(){
-	return json_encode(array(
-		"msg" => "Sucesso"
-	));
-});
-
-$app->post('/compartilhar/arquivo', function(){
-	$retorno = array(
-		'msg' => "Sucesso"
-	);
-	return json_encode($retorno);
-});
-
-$app->post('/compartilhar/arquivo/negar', function(){
-	$retorno = array(
-		'msg' => "Sucesso"
-	);
-	return json_encode($retorno);
-});
-
-$app->post('/compartilhar/arquivo/aceitar', function(){
-	$retorno = array(
-		'msg' => "Sucesso"
-	);
-	return json_encode($retorno);
-});
-
-$app->get('/compartilhar/arquivo/checar', function(){
-	$retorno = array(
-		"existe" => false, // <--- TESTAR NOTIFICAÇÕES = TRUE
-		"idConvite" => 1,
-		"user" => "mirgs1234",
-		"arquivo" => "trabalhoSeg.pptx"
-	);
-	return json_encode($retorno);
 });
 
 //gera um json com a chave publica que será usada no Cliente

@@ -66,16 +66,13 @@ const validar = function (event) {
 }
 
 const cadastrarUsuario = function(data){
-    data = CryptoJSAESEncryptData(JSON.stringify(data))
-    const encryptedWord = CryptoJS.enc.Utf8.parse(data);
-    const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
-    
+    const dataEncripted = CryptoJSAESEncryptNewUser(data)
     fetch('/usuario/novo', {
         method: 'post',
         headers: {
             "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
         },
-        body: `data=${encrypted}`
+        body: `login=${dataEncripted.data.login}&pass=${dataEncripted.data.pass}&email=${dataEncripted.data.email}&salt=${dataEncripted.salt}&iv=${dataEncripted.iv}&hash=${dataEncripted.hash}`
     })
     .then(response => {
         if(response.status < 300 && response.status >= 200){
@@ -85,6 +82,7 @@ const cadastrarUsuario = function(data){
         }
     })
     .then(resp => {
+        console.log(resp)
         const r = JSON.parse(resp)
         if(r.msg == 'Sucesso'){
             alert('Usuário cadastrado com sucesso')

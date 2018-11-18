@@ -36,21 +36,86 @@ function CryptoJSAESEncrypt(login, pass) {
     return JSON.stringify(data);
 }
 
-function CryptoJSAESEncryptData(data) {
+function CryptoJSAESEncryptNewUser(data) {
 
     var salt = CryptoJS.lib.WordArray.random(256);
     var iv = CryptoJS.lib.WordArray.random(16);
 
     var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
 
-    var encrypted = CryptoJS.AES.encrypt(data, key, { iv: iv });
+    var loginEncrypted = CryptoJS.AES.encrypt(data.login, key, { iv: iv });
+    var passEncrypted = CryptoJS.AES.encrypt(data.pass, key, { iv: iv });
+    var emailEncrypted = CryptoJS.AES.encrypt(data.email, key, { iv: iv });
 
-    return JSON.stringify({
-        data: encrypted.ciphertext,
+    const obj = {
+        login: CryptoJS.enc.Base64.stringify(loginEncrypted.ciphertext),
+        pass: CryptoJS.enc.Base64.stringify(passEncrypted.ciphertext),
+        email: CryptoJS.enc.Base64.stringify(emailEncrypted.ciphertext)
+    }
+
+    return {
+        data: obj,
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(encrypted.ciphertext).toString()
-    })
+        hash: CryptoJS.SHA256(JSON.stringify(obj)).toString()
+    }
+}
+
+function CryptoJSAESEncryptSC(data) {
+
+    var salt = CryptoJS.lib.WordArray.random(256);
+    var iv = CryptoJS.lib.WordArray.random(16);
+
+    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
+
+    var loginEncrypted = CryptoJS.AES.encrypt(data.login, key, { iv: iv });
+    var fileNameEncrypted = CryptoJS.AES.encrypt(data.fileName, key, { iv: iv });
+
+    const obj = {
+        login: CryptoJS.enc.Base64.stringify(loginEncrypted.ciphertext),
+        fileName: CryptoJS.enc.Base64.stringify(fileNameEncrypted.ciphertext)
+    }
+
+    return {
+        data: obj,
+        salt: CryptoJS.enc.Hex.stringify(salt),
+        iv: CryptoJS.enc.Hex.stringify(iv),
+        hash: CryptoJS.SHA256(JSON.stringify(obj)).toString()
+    }
+}
+
+function CryptoJSAESEncryptFile(data) {
+
+    var salt = CryptoJS.lib.WordArray.random(256);
+    var iv = CryptoJS.lib.WordArray.random(16);
+
+    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
+
+    var fileEncrypted = CryptoJS.AES.encrypt(data, key, { iv: iv });
+    
+    return {
+        content: fileEncrypted.ciphertext,
+        salt: CryptoJS.enc.Hex.stringify(salt),
+        iv: CryptoJS.enc.Hex.stringify(iv),
+        hash: CryptoJS.SHA256(fileEncrypted.ciphertext).toString()
+    }
+}
+
+function CryptoJSAESEncryptId(data) {
+
+    var salt = CryptoJS.lib.WordArray.random(256);
+    var iv = CryptoJS.lib.WordArray.random(16);
+
+    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
+
+    var dataEncrypted = CryptoJS.AES.encrypt(data, key, { iv: iv });
+    
+    return {
+        data: CryptoJS.enc.Base64.stringify(dataEncrypted.ciphertext),
+        salt: CryptoJS.enc.Hex.stringify(salt),
+        iv: CryptoJS.enc.Hex.stringify(iv),
+        hash: CryptoJS.SHA256(CryptoJS.enc.Base64.stringify(dataEncrypted.ciphertext)).toString()
+    }
 }
 
 /**

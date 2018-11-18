@@ -134,18 +134,7 @@ const cryptoFile = async function (callback) {
             var fileReader = new FileReader();
             openModalLoad(true, 'Aguarde. Criptografando o arquivo...')
             fileReader.onload = function (e) {
-                var fileContents = document.getElementById('arquivo');
-                var fileContents2 = document.getElementById('arquivo2');
-                let cifra = CryptoJS.AES.encrypt(fileReader.result, window.clientkey)
-                //fileContents.innerText = 'Original.....: ' + fileReader.result;
-                //fileContents2.innerText = 'Criptografado: ' + cifra.toString();
-                callback({
-                    fileName: CryptoJS.AES.encrypt(Date.now() + '_' + fileTobeRead.name, window.clientkey).toString(),
-                    fileType: CryptoJS.AES.encrypt(fileTobeRead.type, window.clientkey).toString(),
-                    fileSize: CryptoJS.AES.encrypt(fileTobeRead.size.toString(), window.clientkey).toString(),
-                    fileContent: cifra.toString(),
-                    hashContent: CryptoJS.SHA256(cifra.toString()).toString()
-                })
+                callback(CryptoJSAESEncryptData(fileReader.result))
                 openModalLoad(false)
             }
             fileReader.readAsDataURL(fileTobeRead); //O conteudo do arquivo está em base64
@@ -171,10 +160,15 @@ const getFileInfo = function (data) {
 const sendFile = function () {
     if (window.fileEncrypt) {
         openModalLoad(true, `<p>Aguarde. Salvando o arquivo...</p>`)
-        clientkey = makeClientKey()
+        const fileEncrypted = CryptoJSAESEncryptData(window.fileEncrypt)
+        const encryptedWord = CryptoJS.enc.Utf8.parse(fileEncrypted);
+        const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
         fetch('/upload', {
             method: 'post',
-            body: `data=${JSON.stringify(window.fileEncrypt)}`
+            headers: {
+                "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: `data=${encrypted}`
         })
             .then(function (data) {
                 if (data.status < 300 && data.status >= 200) {
@@ -198,7 +192,16 @@ const sendFile = function () {
 const deleteFile = function (e, id) {
     if (confirm('Confirmar exclusão do arquivo?')) {
         e.preventDefault()
-        fetch(`/arquivo/delete/`, { method: 'delete', body: `data={"id": "${CryptoJS.AES.encrypt(id, window.clientkey).toString()}"}` })
+        const idEncrypted = CryptoJSAESEncryptData(`{"id": "${id}"}`)
+        const encryptedWord = CryptoJS.enc.Utf8.parse(idEncrypted);
+        const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
+        fetch(`/arquivo/delete/`, {
+            method: 'delete',
+            headers: {
+                "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: `data=${encrypted}`
+        })
             .then(function (data) {
                 if (data.status < 300 && data.status >= 200) {
                     return data.text()
@@ -315,7 +318,16 @@ const solicitacaoCompart = function (flag = true) {
 }
 
 const transUserToUser = function (idCompart) {
-    fetch('/compartilhar/arquivo/aceitar', { method: 'post', body: `data={"id": "${CryptoJS.AES.encrypt(idCompart, window.clientkey).toString()}"}` })
+    const idEncrypted = CryptoJSAESEncryptData(`{"id": "${idCompart}"}`)
+    const encryptedWord = CryptoJS.enc.Utf8.parse(idEncrypted);
+    const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
+    fetch('/compartilhar/arquivo/aceitar', {
+        method: 'post',
+        headers: {
+            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+        },
+        body: `data=${encrypted}`
+    })
         .then(data => {
             if (data.status < 300 && data.status >= 200) {
                 return data.text()
@@ -333,7 +345,16 @@ const transUserToUser = function (idCompart) {
 }
 
 const deleteCompart = function (idCompart) {
-    fetch('/compartilhar/arquivo/negar', { method: 'post', body: `data={"id": "${CryptoJS.AES.encrypt(idCompart, window.clientkey).toString()}"}` })
+    const idEncrypted = CryptoJSAESEncryptData(`{"id": "${idCompart}"}`)
+    const encryptedWord = CryptoJS.enc.Utf8.parse(idEncrypted);
+    const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
+    fetch('/compartilhar/arquivo/negar', {
+        method: 'post',
+        headers: {
+            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+        },
+        body: `data=${encrypted}`
+    })
         .then(data => {
             if (data.status < 300 && data.status >= 200) {
                 return data.text()
@@ -358,9 +379,15 @@ const sendCompartilhamento = function (e) {
             login: CryptoJS.AES.encrypt(loginCompart.value, window.clientkey).toString(),
             arquivo: CryptoJS.AES.encrypt(fileCompart.value, window.clientkey).toString()
         }
+        const dadosEncrypted = CryptoJSAESEncryptData(JSON.stringify(dados))
+        const encryptedWord = CryptoJS.enc.Utf8.parse(dadosEncrypted);
+        const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
         fetch('/compartilhar/arquivo', {
             method: 'post',
-            body: `data=${CryptoJS.AES.encrypt(JSON.stringify(dados), window.clientkey).toString()}`
+            headers: {
+                "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: `data=${encrypted}`
         })
             .then(data => {
                 if (data.status < 300 && data.status >= 200) {
@@ -394,7 +421,7 @@ const validarFormCompart = function (loginCompart, fileCompart) {
         alert('Selecione um arquivo')
         return false
     }
-    if(!validarUser()){
+    if (!validarUser()) {
         alert('Informe um usuário válido')
         return false
     }

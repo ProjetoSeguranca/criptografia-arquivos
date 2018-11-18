@@ -66,9 +66,16 @@ const validar = function (event) {
 }
 
 const cadastrarUsuario = function(data){
+    data = CryptoJSAESEncryptData(JSON.stringify(data))
+    const encryptedWord = CryptoJS.enc.Utf8.parse(data);
+    const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
+    
     fetch('/usuario/novo', {
         method: 'post',
-        body: `data=${CryptoJS.AES.encrypt(JSON.stringify(data), window.clientkey)}`
+        headers: {
+            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+        },
+        body: `data=${encrypted}`
     })
     .then(response => {
         if(response.status < 300 && response.status >= 200){

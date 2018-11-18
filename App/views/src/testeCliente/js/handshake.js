@@ -36,6 +36,23 @@ function CryptoJSAESEncrypt(login, pass) {
     return JSON.stringify(data);
 }
 
+function CryptoJSAESEncryptData(data) {
+
+    var salt = CryptoJS.lib.WordArray.random(256);
+    var iv = CryptoJS.lib.WordArray.random(16);
+
+    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
+
+    var encrypted = CryptoJS.AES.encrypt(data, key, { iv: iv });
+
+    return JSON.stringify({
+        data: encrypted.ciphertext,
+        salt: CryptoJS.enc.Hex.stringify(salt),
+        iv: CryptoJS.enc.Hex.stringify(iv),
+        hash: CryptoJS.SHA256(encrypted.ciphertext).toString()
+    })
+}
+
 /**
  * Está função criptografa a chave AES gerada pelo cliente com a chave
  * pública do servidor. Esta função é utiizada para enviar a chave AES
@@ -88,7 +105,6 @@ const sendAESKey = function () {
     clientkey = makeClientKey()
     const encKey = encryptPublicKey(clientkey)
     const encryptedWord = CryptoJS.enc.Utf8.parse(encKey);
-    //console.log("palavra  : ",encryptedWord);
     const encrypted = CryptoJS.enc.Base64.stringify(encryptedWord);
     const hashKey = CryptoJS.SHA256(encrypted).toString()
     fetch('keyencodecliente', { // <---- mudar

@@ -32,6 +32,10 @@ class Users extends Model{
 			
 		}
 
+		$dir = "./user/".$data['deslogin'];
+		if(!is_dir($dir)){
+			mkdir($dir);
+		}
 	}
 	//verifica se o usuario está logado
 	public static function verifyLogin(){
@@ -46,27 +50,29 @@ class Users extends Model{
 		}
 	}
  // esta função ainda não está sendo utilizada ainda 
-	public function save(){
+	public function save($login,$email,$pass){
 
-		$password = password_hash($this->getdespassword(), PASSWORD_DEFAULT, [ "cost"=>12]);
-		$user = hash("sha512",$this->getlogin,false);
+		$password = password_hash($pass, PASSWORD_DEFAULT, [ "cost"=>12]);
+		$user = hash("sha512",$login,false);
+		$encryption_key = base64_encode(openssl_random_pseudo_bytes(32));
 
 		$sql = new Sql();
 		$resutls = $sql->select("SELECT * FROM  users WHERE deslogin = :LOGIN",array(
 			':LOGIN'=>$user));
 
 		if(count($resutls) === 0){
-			$sql->query("INSERT INTO users(dtregister, despassword, desemail, deslogin) VALUES ( NOW(), :PASSWORD, :EMAIL, :LOGIN )",array(
+			$sql->query("INSERT INTO users(dtregister, despassword, desemail, deslogin, AESKey) VALUES ( NOW(), :PASSWORD, :EMAIL, :LOGIN, :AESKey)",array(
 			':LOGIN'=> $user,
 			':PASSWORD'=> $password,
-			':EMAIL'=>$this->getemail(),
-			':LOGIN'=>$this->getlogin()
+			':EMAIL'=>$email,
+			':AESKey'=>$encryption_key
 		));
 		}else{
 			throw new \Exception("Usuário ja existente");
 			
 		}
 	}
+
 	//esta função descriptografa a chave do AES com a chave privada ( utiliza RSA)
 	public static function privateKeyDecrypt($data, $privatekey){
 		$clientkey = base64_decode($data);

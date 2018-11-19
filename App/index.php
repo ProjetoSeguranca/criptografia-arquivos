@@ -92,6 +92,25 @@ $app->get('/arquivos',function(){
     $page->setTpl("arquivos",$data);
 });
 
+
+$app->get('/novocadastro',function(){
+	$page = new Page();
+	$page->setTpl("cadastro");
+});
+
+$app->post('/usuario/novo',function(){
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$login = Users::CryptoJSAesDecrypt($chaveAES,$_POST['salt'] ,$_POST['iv'] ,$_POST['login']);
+	$pass = Users::CryptoJSAesDecrypt($chaveAES,$_POST['salt'] ,$_POST['iv'] ,$_POST['pass']);
+	$email = Users::CryptoJSAesDecrypt($chaveAES,$_POST['salt'] ,$_POST['iv'] ,$_POST['email']);
+	$user = new Users();
+	$user->save($login,$email,$pass);
+	return json_encode(array(
+		"msg" => "Sucesso"
+	));
+});
+
+
 $app->run();
 
 

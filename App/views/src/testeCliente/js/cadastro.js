@@ -70,7 +70,7 @@ const cadastrarUsuario = function(data){
     fetch('/usuario/novo', {
         method: 'post',
         headers: {
-            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            "Content-type": "application/x-www-form-urlencoded;"
         },
         body: `login=${dataEncripted.data.login}&pass=${dataEncripted.data.pass}&email=${dataEncripted.data.email}&salt=${dataEncripted.salt}&iv=${dataEncripted.iv}&hash=${dataEncripted.hash}`
     })

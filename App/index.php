@@ -100,16 +100,37 @@ $app->get('/novocadastro',function(){
 
 $app->post('/usuario/novo',function(){
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
-	$login = Users::CryptoJSAesDecrypt($chaveAES,$_POST['salt'] ,$_POST['iv'] ,$_POST['login']);
-	$pass = Users::CryptoJSAesDecrypt($chaveAES,$_POST['salt'] ,$_POST['iv'] ,$_POST['pass']);
-	$email = Users::CryptoJSAesDecrypt($chaveAES,$_POST['salt'] ,$_POST['iv'] ,$_POST['email']);
-	$user = new Users();
-	$user->save($login,$email,$pass);
-	return json_encode(array(
-		"msg" => "Sucesso"
-	));
+	Users::decryptedForSaveUser($_POST['login'],$_POST['email'],$_POST['pass'],$chaveAES,$_POST['salt'],$_POST['iv']);
+	return Users::returnSucess();
 });
 
+$app->post('/upload',function(){
+	$_SESSION['results'] = $_POST;
+	return Users::returnSucess();
+});
+$app->get('/teste',function(){
+	//var_dump($_SESSION);
+	
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$fileName = base64_decode($_SESSION['results']['fileName']);
+	$decryptedContent = Users::CryptoJSAesDecrypt($chaveAES, $_SESSION['results']['salt'] , $_SESSION['results']['iv'] ,$_SESSION['results']['content']);
+	//$results = $_SESSION['results'];
+	//$content = base64_decode($results['content']);
+	
+	//$user = $_SESSION['User'];
+	//$contents = base64_decode($results['content']);
+	//$cont = base64_decode($contents);
+	//$arquivos = Users::CryptoJSAesDecrypt($_SESSION['chaveAES'],$results['salt'] ,$results['iv'] ,$contents);
+	
+	//var_dump($content); 
+	
+	//$dirUser = "./users/".$_SESSION['User']['deslogin'];
+	//$dir = $dirUser . "/" . $fileName;
+	//file_put_contents($dir, $decryptedContent);
+	var_dump($decryptedContent);
+	//var_dump($data);
+	//var_dump($data1);
+});
 
 $app->run();
 

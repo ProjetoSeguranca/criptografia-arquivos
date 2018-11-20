@@ -134,7 +134,10 @@ const cryptoFile = async function (callback) {
             var fileReader = new FileReader();
             openModalLoad(true, 'Aguarde. Criptografando o arquivo...')
             fileReader.onload = function (e) {
-                callback(CryptoJSAESEncryptFile(fileReader.result))
+                callback(CryptoJSAESEncryptFile({
+                    content: fileReader.result,
+                    fileName: fileSelected.files[0].name
+                }))
                 openModalLoad(false)
             }
             fileReader.readAsDataURL(fileTobeRead); //O conteudo do arquivo está em base64
@@ -163,9 +166,9 @@ const sendFile = function () {
         fetch('/upload', {
             method: 'post',
             headers: {
-                "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+                "Content-type": "application/x-www-form-urlencoded"
             },
-            body: `content=${window.fileEncrypt.content}&salt=${window.fileEncrypt.salt}&iv=${window.fileEncrypt.iv}&hash=${window.fileEncrypt.hash}`
+            body: `content=${window.fileEncrypt.data.content}&fileName=${window.fileEncrypt.data.fileName}&salt=${window.fileEncrypt.salt}&iv=${window.fileEncrypt.iv}&hash=${window.fileEncrypt.hash}&key=${window.fileEncrypt.key}`
         })
             .then(function (data) {
                 if (data.status < 300 && data.status >= 200) {
@@ -185,7 +188,6 @@ const sendFile = function () {
         alertSend('<strong>Atenção! </strong>Nenhum arquivo foi selecionado para envio', 'alert-warning')
     }
 }
-
 const deleteFile = function (e, id) {
     if (confirm('Confirmar exclusão do arquivo?')) {
         e.preventDefault()

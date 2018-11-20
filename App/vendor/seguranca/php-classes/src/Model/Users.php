@@ -32,7 +32,7 @@ class Users extends Model{
 			
 		}
 
-		$dir = "./user/".$data['deslogin'];
+		$dir = "./users/".$data['deslogin'];
 		if(!is_dir($dir)){
 			mkdir($dir);
 		}
@@ -50,7 +50,7 @@ class Users extends Model{
 		}
 	}
  // esta função ainda não está sendo utilizada ainda 
-	public function save($login,$email,$pass){
+	public static function save($login,$email,$pass){
 
 		$password = password_hash($pass, PASSWORD_DEFAULT, [ "cost"=>12]);
 		$user = hash("sha512",$login,false);
@@ -73,6 +73,19 @@ class Users extends Model{
 		}
 	}
 
+	public static function decryptedForSaveUser($login,$email,$pass,$chaveAES,$salt,$iv){
+		$decryptedLogin = Users::CryptoJSAesDecrypt($chaveAES,$salt ,$iv ,$login);
+		$decryptedPass = Users::CryptoJSAesDecrypt($chaveAES,$salt ,$iv ,$pass);
+		$decryptedEmail = Users::CryptoJSAesDecrypt($chaveAES,$salt ,$iv ,$email);
+		Users::save($decryptedLogin,$decryptedEmail,$decryptedPass);
+
+	}
+
+	public static function returnSucess(){
+		return json_encode(array(
+			"msg" => "Sucesso"
+		));
+	}
 	//esta função descriptografa a chave do AES com a chave privada ( utiliza RSA)
 	public static function privateKeyDecrypt($data, $privatekey){
 		$clientkey = base64_decode($data);

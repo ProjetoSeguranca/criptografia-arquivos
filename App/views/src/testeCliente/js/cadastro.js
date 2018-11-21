@@ -85,7 +85,7 @@ const cadastrarUsuario = function(data){
         const r = JSON.parse(resp)
         if(r.msg == 'Sucesso'){
             alert('Usuário cadastrado com sucesso')
-            //window.location.href = '/'
+            window.location.href = '/'
         }
     })
     .catch(err => {

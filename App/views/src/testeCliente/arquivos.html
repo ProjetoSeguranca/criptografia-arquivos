@@ -79,7 +79,7 @@
     <div class="arquivos">
       <h1>Meus Arquivos</h1>
       <div class="formEnviar">
-        <input type="file" name="file" id="file" accept="image/png, image/jpeg">
+        <input type="file" name="file" id="file">
         <input class="btn btn-primary btn-xs" type="button" onclick="sendFile()" value="Enviar arquivo">
       </div>
       <div id="divAlert" class="alert fade in">

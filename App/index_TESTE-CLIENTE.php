@@ -70,6 +70,8 @@ $app->post('/usuario/novo', function(Requests $request){
 });
 
 $app->post('/upload', function(){
+	$json = file_get_contents('php://input');
+	$_SESSION["teste"] = json_decode($json);
 	return json_encode(array(
 		"msg" => "Sucesso"
 	));

@@ -91,28 +91,22 @@ function CryptoJSAESEncryptFile(data) {
 
     var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
 
-    var fileEncrypted = CryptoJS.AES.encrypt(data.content, key, { iv: iv });
-
-    const encryptedWord = CryptoJS.enc.Utf8.parse(fileEncrypted.ciphertext);
-    const encBase64 = CryptoJS.enc.Base64.stringify(encryptedWord);
-
-    const encryptedWord2 = CryptoJS.enc.Utf8.parse(data.fileName);
-    const fileName = CryptoJS.enc.Base64.stringify(encryptedWord2);
-
-    const encryptedWord3 = CryptoJS.enc.Utf8.parse(encryptPublicKey(window.clientkey));
-    const keyBase64 = CryptoJS.enc.Base64.stringify(encryptedWord3);
+    var fileContentEncrypted = CryptoJS.AES.encrypt(data.content, key, { iv: iv });
+    var fileNameEncrypted = CryptoJS.AES.encrypt(data.fileName, key, { iv: iv });
 
     const obj = {
-        data: {
-            content: encBase64,
-            fileName
-        },
-        key: keyBase64,
+        fileContent: CryptoJS.enc.Base64.stringify(fileContentEncrypted.ciphertext),
+        fileName: CryptoJS.enc.Base64.stringify(fileNameEncrypted.ciphertext)
+    }
+
+    console.log(obj)
+
+    return {
+        data: obj,
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(fileEncrypted.ciphertext).toString()
+        hash: CryptoJS.SHA256(obj).toString()
     }
-    return obj
 }
 
 function CryptoJSAESEncryptId(data) {
@@ -123,7 +117,7 @@ function CryptoJSAESEncryptId(data) {
     var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
 
     var dataEncrypted = CryptoJS.AES.encrypt(data, key, { iv: iv });
-    
+
     return {
         data: CryptoJS.enc.Base64.stringify(dataEncrypted.ciphertext),
         salt: CryptoJS.enc.Hex.stringify(salt),

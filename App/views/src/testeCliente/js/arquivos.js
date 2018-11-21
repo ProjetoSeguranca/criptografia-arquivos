@@ -166,9 +166,9 @@ const sendFile = function () {
         fetch('/upload', {
             method: 'post',
             headers: {
-                "Content-type": "application/x-www-form-urlencoded"
+                "Content-type": "application/json; charset=utf-8"
             },
-            body: `content=${window.fileEncrypt.data.content}&fileName=${window.fileEncrypt.data.fileName}&salt=${window.fileEncrypt.salt}&iv=${window.fileEncrypt.iv}&hash=${window.fileEncrypt.hash}&key=${window.fileEncrypt.key}`
+            body: JSON.stringify(window.fileEncrypt)
         })
             .then(function (data) {
                 if (data.status < 300 && data.status >= 200) {

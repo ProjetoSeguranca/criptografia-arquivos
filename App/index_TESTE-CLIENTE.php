@@ -56,7 +56,14 @@ $app->get('/novocadastro', function(){
     $page->setTpl("cadastro");
 });
 
+$app->get('/teste', function(){
+	header('Content-Type: application/json; charset=utf-8');
+	return json_encode($_SESSION["teste"]);
+});
+
 $app->post('/usuario/novo', function(Requests $request){
+	$json = file_get_contents('php://input');
+	$_SESSION["teste"] = json_decode($json);
 	return json_encode(array(
 		"msg" => "Sucesso"
 	));

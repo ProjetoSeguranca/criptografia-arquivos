@@ -70,9 +70,9 @@ const cadastrarUsuario = function(data){
     fetch('/usuario/novo', {
         method: 'post',
         headers: {
-            "Content-type": "application/x-www-form-urlencoded;"
+            "Content-type": "application/json; charset=utf-8"
         },
-        body: `login=${dataEncripted.data.login}&pass=${dataEncripted.data.pass}&email=${dataEncripted.data.email}&salt=${dataEncripted.salt}&iv=${dataEncripted.iv}&hash=${dataEncripted.hash}`
+        body: JSON.stringify(dataEncripted)
     })
     .then(response => {
         if(response.status < 300 && response.status >= 200){
@@ -82,11 +82,10 @@ const cadastrarUsuario = function(data){
         }
     })
     .then(resp => {
-        console.log(resp)
         const r = JSON.parse(resp)
         if(r.msg == 'Sucesso'){
             alert('Usuário cadastrado com sucesso')
-            window.location.href = '/'
+            //window.location.href = '/'
         }
     })
     .catch(err => {

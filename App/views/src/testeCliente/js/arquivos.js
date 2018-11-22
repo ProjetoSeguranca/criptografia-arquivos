@@ -191,13 +191,8 @@ const sendFile = function () {
 const deleteFile = function (e, id) {
     if (confirm('Confirmar exclusão do arquivo?')) {
         e.preventDefault()
-        const idEncrypted = CryptoJSAESEncryptId(`${id}`)
-        fetch(`/arquivo/delete/`, {
-            method: 'delete',
-            headers: {
-                "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
-            },
-            body: `data=${idEncrypted.data}&salt=${idEncrypted.salt}&iv=${idEncrypted.iv}&hash=${idEncrypted.hash}`
+        fetch(`delete/${id}`, {
+            method: 'delete'
         })
             .then(function (data) {
                 if (data.status < 300 && data.status >= 200) {
@@ -227,7 +222,7 @@ const getFilesUser = function () {
         })
         .then(data => {
             window.files = JSON.parse(data)
-            insetDataFilesTable(window.files)
+            insetDataFilesTable(CryptoJSAesDecrypt(window.files))
             openModalLoad(false)
         })
         .catch((error) => {
@@ -242,17 +237,17 @@ const insetDataFilesTable = function (files) {
     tbody.innerHTML = ''
     const rows = files.map(file => {
         const tdName = document.createElement('td')
-        tdName.innerHTML = file.name
+        tdName.innerHTML = file.fileName
         const tdModificationData = document.createElement('td')
         tdModificationData.innerHTML = file.modificationData
         const tdType = document.createElement('td')
-        tdType.innerHTML = file.type
+        tdType.innerHTML = file.fileType
         const tdExt = document.createElement('td')
-        tdExt.innerHTML = file.ext
+        tdExt.innerHTML = 'arquivo'
         const tdSize = document.createElement('td')
-        tdSize.innerHTML = file.size
+        tdSize.innerHTML = file.fileSize
         const tdActions = document.createElement('td')
-        tdActions.innerHTML = `<a onclick="deleteFile(event, '${file.name}')" class="btn btn-danger btn-xs">Excluir</a>`
+        tdActions.innerHTML = `<a onclick="deleteFile(event, '${file.idArquivo}')" class="btn btn-danger btn-xs">Excluir</a>`
         const tr = document.createElement('tr')
         tr.appendChild(tdName)
         tr.appendChild(tdModificationData)

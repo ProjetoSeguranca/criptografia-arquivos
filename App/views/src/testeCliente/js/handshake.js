@@ -142,6 +142,21 @@ const encryptAESClient = function (data) {
     return CryptoJS.AES.encrypt(data, window.clientkey, { iv: window.iv })
 }
 
+function CryptoJSAesDecrypt(data){
+
+    var objJson = JSON.parse(data);
+
+    var encrypted = objJson.listaArquivos;
+    var salt = CryptoJS.enc.Hex.parse(objJson.salt);
+    var iv = CryptoJS.enc.Hex.parse(objJson.iv);   
+
+    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64/8, iterations: 999});
+
+    var decrypted = CryptoJS.AES.decrypt(encrypted, key, { iv: iv});
+
+    return decrypted.toString(CryptoJS.enc.Utf8);
+}
+
 /**
  * Está função é responsável por obter a chave pública do servidor.
  * Recebe como parametro uma callback, que enviará a chave AES que

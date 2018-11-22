@@ -221,10 +221,28 @@ class Users extends Model{
 
 	public function listFilesUser($iduser){
 		$sql = new Sql();
-		$results = $sql->select("SELECT * FROM db_projeto_seguranca.arquivos where idUsuario = :iduser",array(
+		$results = $sql->select("SELECT * FROM arquivos where idUsuario = :iduser",array(
 			':iduser' => $iduser
 		));
 		return $results;
+	}
+
+	public function getFileForId($idarquivo){
+		$sql = new Sql();
+		$results = $sql->select("SELECT * FROM arquivos WHERE idArquivo = :idarquivo",array(
+			':idarquivo' => $idarquivo
+		));
+		return $results['0'];
+	}
+
+	public function deleteArquivo($idarquivo, $filename){
+		$dirUser = "./users/".$_SESSION['User']['deslogin'];
+		$dirArquivo = $dirUser . "/" . $filename;
+		unlink($dirArquivo);
+		$sql = new Sql();
+		$sql->query("DELETE FROM arquivos WHERE idArquivo = :idarquivo",array(
+			":idarquivo" => $idarquivo
+		));
 	}
 }
 

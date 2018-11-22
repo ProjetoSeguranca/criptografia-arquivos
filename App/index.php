@@ -120,11 +120,6 @@ $app->post('/upload',function(){
 	return Users::returnSucess();
 });
 
-$app->get('/teste',function(){
-	$data = $_SESSION['data'];
-	Users::decryptedFile($data);
-	
-});
 
 $app->get('/listar/arquivos',function(){
 	$user = new Users();
@@ -146,14 +141,25 @@ $app->get('/listar/arquivos',function(){
 
 		array_push($dataEncrypt, $aux);	
 	}
-
-	
 	
 	return json_encode(array(
 		"listaArquivos" => $dataEncrypt,
 		"salt" => $salt,
 		"iv" => $iv
 	));
+});
+
+$app->get('/teste',function(){
+	
+	
+});
+
+$app->get("/arquivos/delete/{idArquivo}",function(Requests $request,Response $response,array $args){
+	$user = new Users();
+	$data = $user->getFileForId($args['idArquivo']);
+	if($data!= null){
+		$user->deleteArquivo($data['idArquivo'], $data['fileName']);
+	}
 });
 
 $app->run();

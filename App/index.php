@@ -150,7 +150,20 @@ $app->get('/listar/arquivos',function(){
 });
 
 $app->get('/teste',function(){
+	$user = new Users();
+	$data = $user->getFileForId(22);
 	
+	if($data!= null){
+		$user->deleteArquivo($data['idArquivo'], $data['fileName']);
+		return json_encode(array(
+			"msg" => "Sucesso"
+		));
+	}
+	if($data === null){
+		return json_encode(array(
+			"msg" => "Falha"
+		));
+	}
 	
 });
 
@@ -159,6 +172,14 @@ $app->get("/arquivos/delete/{idArquivo}",function(Requests $request,Response $re
 	$data = $user->getFileForId($args['idArquivo']);
 	if($data!= null){
 		$user->deleteArquivo($data['idArquivo'], $data['fileName']);
+		return json_encode(array(
+			"msg" => "Sucesso"
+		));
+	}
+	if($data === null){
+		return json_encode(array(
+			"msg" => "Falha"
+		));
 	}
 });
 

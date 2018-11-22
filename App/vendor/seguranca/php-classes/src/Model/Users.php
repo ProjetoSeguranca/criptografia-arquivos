@@ -232,10 +232,14 @@ class Users extends Model{
 		$results = $sql->select("SELECT * FROM arquivos WHERE idArquivo = :idarquivo",array(
 			':idarquivo' => $idarquivo
 		));
-		return $results['0'];
+		$data = null;
+		foreach ($results as $key => $value) {
+			$data = $value;
+		}
+		return $data;
 	}
 
-	public function deleteArquivo($idarquivo, $filename){
+	public function deleteArquivo($idarquivo, $filename){	
 		$dirUser = "./users/".$_SESSION['User']['deslogin'];
 		$dirArquivo = $dirUser . "/" . $filename;
 		unlink($dirArquivo);
@@ -243,6 +247,7 @@ class Users extends Model{
 		$sql->query("DELETE FROM arquivos WHERE idArquivo = :idarquivo",array(
 			":idarquivo" => $idarquivo
 		));
+	
 	}
 }
 

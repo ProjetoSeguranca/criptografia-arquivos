@@ -234,9 +234,15 @@ const getFilesUser = function () {
         })
 }
 
-const downloadFile = function(id){
-    openModalLoad(true, 'Aguarde. Descriptografando arquivo para baixar...')
-    fetch(`arquivos/download/${id}`)
+const downloadFile = function (id) {
+    openModalLoad(true, 'Aguarde. Descriptografando o arquivo para baixar...')
+    fetch(`arquivos/download/`, {
+        method: 'post',
+        headers: {
+            "Content-type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify(CryptoJSAESEncryptId(id))
+    })
         .then(resp => {
             if (resp.status < 300 && resp.status >= 200) {
                 return resp.text()
@@ -245,15 +251,31 @@ const downloadFile = function(id){
             }
         })
         .then(data => {
-            window.files = JSON.parse(data)
-            insetDataFilesTable(window.files)
+            const fileEncrypted = JSON.parse(data)
+            construirArquivo({
+                id,
+                fileName,
+                fileEncrypted
+            })
             openModalLoad(false)
         })
         .catch((error) => {
+            openModalLoad(false)
             console.log(error)
             alertSend(`<strong>Erro! </strong>Falha ao baixar arquivo`, 'alert-danger')
-            openModalLoad(false)
         })
+}
+
+const construirArquivo = function (data) {
+    const decryptedFileContent = CryptoJSAesDecrypt(data.fileContent, data.salt, data)
+    const decryptedFileName = CryptoJSAesDecrypt(data.fileName, data.salt, data)
+
+    const dataURL = `data:application/octet-stream,${decryptedFileContent}`
+    const elementLink = document.getElementById(`file${data.id}`)
+    elementLink.download = data.decryptedFileName
+    elementLink.target = '_blank'
+    elementLink.href = dataURL
+    elementLink.click()
 }
 
 const insetDataFilesTable = function (files) {
@@ -265,6 +287,7 @@ const insetDataFilesTable = function (files) {
         const tdName = document.createElement('td')
         const tdNameLink = document.createElement('a')
         tdNameLink.setAttribute('onclick', `downloadFile('${CryptoJSAesDecrypt(file.idArquivo, files.salt, files.iv)}')`)
+        tdNameLink.setAttribute('id', `file${CryptoJSAesDecrypt(file.idArquivo, files.salt, files.iv)}`)
         tdNameLink.innerHTML = CryptoJSAesDecrypt(file.fileName, files.salt, files.iv)
         tdName.appendChild(tdNameLink)
         const tdModificationData = document.createElement('td')

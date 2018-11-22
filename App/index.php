@@ -126,6 +126,36 @@ $app->get('/teste',function(){
 	
 });
 
+$app->get('/listar/arquivos',function(){
+	$user = new Users();
+	$data = $user->listFilesUser($_SESSION['User']['iduser']);
+	$salt = $user->generatedSalt();
+	$iv = $user->generatedIV();
+
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+
+	$dataEncrypt = array();
+	foreach ($data as $key => $value) {
+		$aux = array('idArquivo' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['idArquivo'])),
+		'idUsuario' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['idUsuario'])),
+		'modificationData' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['modificationData'])),
+		'fileName' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['fileName'])),
+		'fileType' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['fileType'])),
+		'fileSize' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['fileSize']))
+		 );
+
+		array_push($dataEncrypt, $aux);	
+	}
+
+	
+	
+	return json_encode(array(
+		"listaArquivos" => $dataEncrypt,
+		"salt" => $salt,
+		"iv" => $iv
+	));
+});
+
 $app->run();
 
 

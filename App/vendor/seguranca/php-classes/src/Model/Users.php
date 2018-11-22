@@ -194,6 +194,17 @@ class Users extends Model{
  		return $file;
 
 	}
+
+	public function generatedSalt(){
+		$salt = openssl_random_pseudo_bytes(256);
+		return bin2hex($salt);
+	}
+	
+	public function generatedIV(){
+    	$iv = openssl_random_pseudo_bytes(16);
+    	return bin2hex($iv);
+	}
+
 	public function CryptoJSAesEncrypt($passphrase, $salt ,$iv ,$data){
 		$salt1 = hex2bin($salt);
 		$iv1 = hex2bin($iv);
@@ -206,7 +217,14 @@ class Users extends Model{
 	    $encrypted= openssl_encrypt($data , 'aes-256-cbc', hex2bin($key), OPENSSL_RAW_DATA, $iv1);
 	   
 	    return $encrypted;
+	}
 
+	public function listFilesUser($iduser){
+		$sql = new Sql();
+		$results = $sql->select("SELECT * FROM db_projeto_seguranca.arquivos where idUsuario = :iduser",array(
+			':iduser' => $iduser
+		));
+		return $results;
 	}
 }
 

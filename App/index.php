@@ -9,7 +9,7 @@ session_start();
 
 
 require_once("vendor/autoload.php");
-
+use \Seguranca\DB\Sql;
 use Seguranca\Model\Users;
 use Seguranca\Page;
 use \phpseclib\Crypt\RSA;
@@ -107,33 +107,23 @@ $app->post('/usuario/novo',function(){
 });
 
 $app->post('/upload',function(){
-	$_SESSION['results'] = $_POST;
+	Users::verifyLogin();
+	$json = file_get_contents('php://input');
+	$results = json_decode($json,true);
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$fileName = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']['fileName']);
+	$fileContent = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']['fileContent']);
+	$user = new Users();
+	$data = $user->encryptFile($fileContent);
+	Users::insertFile($fileName , $data);
+	$_SESSION['data'] = $data;
 	return Users::returnSucess();
 });
+
 $app->get('/teste',function(){
+	$data = $_SESSION['data'];
+	Users::decryptedFile($data);
 	
-	//----------------------------------------teste Arquivos---------------------------------------------------------------------------
-	//var_dump($_SESSION);
-	
-	//$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
-	//$fileName = base64_decode($_SESSION['results']['fileName']);
-	//$decryptedContent = Users::CryptoJSAesDecrypt($chaveAES, $_SESSION['results']['salt'] , $_SESSION['results']['iv'] ,$_SESSION['results']['content']);
-	//$results = $_SESSION['results'];
-	//$content = base64_decode($results['content']);
-	
-	//$user = $_SESSION['User'];
-	//$contents = base64_decode($results['content']);
-	//$cont = base64_decode($contents);
-	//$arquivos = Users::CryptoJSAesDecrypt($_SESSION['chaveAES'],$results['salt'] ,$results['iv'] ,$contents);
-	
-	//var_dump($content); 
-	
-	//$dirUser = "./users/".$_SESSION['User']['deslogin'];
-	//$dir = $dirUser . "/" . $fileName;
-	//file_put_contents($dir, $decryptedContent);
-	//var_dump($decryptedContent);
-	//var_dump($data);
-	//var_dump($data1);
 });
 
 $app->run();

@@ -109,6 +109,105 @@ class Users extends Model{
 	    return $decrypted;
 
 	}
+	public static function insertFile($fileName , $data){
+		
+		$dirUser = "./users/".$_SESSION['User']['deslogin'];
+		$dir = $dirUser . "/" . $fileName;
+		file_put_contents($dir, $data);
+		$type = explode(".", $fileName);
+		$fileType = $type[1];
+		$tamanho = Users::FileSizeConvert(filesize($dir));
+		$sql = new Sql();
+		$sql->query("INSERT INTO arquivos (idUsuario , modificationData , fileName, fileType, fileSize) VALUES ( :IDUSER, NOW(), :FILENAME, :FILETYPE, :FILESIZE)",array(
+			':IDUSER'=> $_SESSION['User']['iduser'],
+			':FILENAME'=>$fileName,
+			':FILETYPE'=>$fileType,
+			':FILESIZE'=>$tamanho
+		));
+			
+	}
+
+	public static function FileSizeConvert($bytes){
+    	$bytes = floatval($bytes);
+        $arBytes = array(
+            0 => array(
+                "UNIT" => "TB",
+                "VALUE" => pow(1024, 4)
+            ),
+            1 => array(
+                "UNIT" => "GB",
+                "VALUE" => pow(1024, 3)
+            ),
+            2 => array(
+                "UNIT" => "MB",
+                "VALUE" => pow(1024, 2)
+            ),
+            3 => array(
+                "UNIT" => "KB",
+                "VALUE" => 1024
+            ),
+            4 => array(
+                "UNIT" => "B",
+                "VALUE" => 1
+            ),
+        );
+
+    	foreach($arBytes as $arItem){
+        	if($bytes >= $arItem["VALUE"]){
+            	$result = $bytes / $arItem["VALUE"];
+            	$result = str_replace(".", "," , strval(round($result, 2)))." ".$arItem["UNIT"];
+            break;
+        	}
+    	}
+    	return $result;
+	}
+
+	public  function encryptFile($fileContent){
+		$file = explode(',', $fileContent);
+		$dataDecrypted = base64_decode($file[1]);
+		$sql = new Sql();
+		$data = $sql->select("SELECT * FROM  users WHERE iduser = :iduser",array(
+			':iduser'=>$_SESSION['User']['iduser'])); 
+		$results = $data[0];
+		$chaveAES = $results['AESKey'];
+		$encryption_key = base64_decode($chaveAES);
+		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+		$code = openssl_encrypt($dataDecrypted,'aes-256-cbc',$encryption_key,0,$iv);
+		$result = base64_encode($code.'::'.$iv);
+		return $result;
+	}
+
+	public function decryptedFile($data){
+		$sql = new Sql();
+		$chave = $sql->select("SELECT * FROM  users WHERE iduser = :iduser",array(
+			':iduser'=>$_SESSION['User']['iduser'])); 
+		//$result= $sql->select("SELECT * FROM  arquivos WHERE idarquivo = 3");
+		//$arquivo = $result[0]['fileName'];
+		$results = $chave[0];
+		$chaveAES = $results['AESKey'];
+		$encryption_key = base64_decode($chaveAES);
+ 		list($code , $iv) = explode('::', base64_decode($data), 2);
+ 		$file = openssl_decrypt($code, 'aes-256-cbc', $encryption_key, 0, $iv);
+ 		//$dirUser = "./users/".$_SESSION['User']['deslogin'];
+		//$dir = $dirUser . "/" ."decrypted".$arquivo;
+		//file_put_contents($dir, $file);
+ 		return $file;
+
+	}
+	public function CryptoJSAesEncrypt($passphrase, $salt ,$iv ,$data){
+		$salt1 = hex2bin($salt);
+		$iv1 = hex2bin($iv);
+	    //$info = base64_decode($data);
+	   
+	    $iterations = 999;
+
+	    $key = hash_pbkdf2("sha512", $passphrase, $salt1, $iterations, 64);
+	   
+	    $encrypted= openssl_encrypt($data , 'aes-256-cbc', hex2bin($key), OPENSSL_RAW_DATA, $iv1);
+	   
+	    return $encrypted;
+
+	}
 }
 
 

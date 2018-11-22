@@ -251,11 +251,11 @@ const downloadFile = function (id) {
             }
         })
         .then(data => {
-            const fileEncrypted = JSON.parse(data)
+            const fileContent = JSON.parse(data)
             construirArquivo({
                 id,
                 fileName,
-                fileEncrypted
+                fileContent
             })
             openModalLoad(false)
         })

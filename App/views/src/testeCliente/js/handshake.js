@@ -126,6 +126,20 @@ function CryptoJSAESEncryptId(data) {
     }
 }
 
+function CryptoJSAesDecrypt(data, salt1, iv1) {
+
+    var encrypted = data;
+
+    var salt = CryptoJS.enc.Hex.parse(salt1);
+    var iv = CryptoJS.enc.Hex.parse(iv1);
+
+    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
+
+    var decrypted = CryptoJS.AES.decrypt(encrypted, key, { iv: iv });
+
+    return decrypted.toString(CryptoJS.enc.Utf8);
+}
+
 /**
  * Está função criptografa a chave AES gerada pelo cliente com a chave
  * pública do servidor. Esta função é utiizada para enviar a chave AES
@@ -142,27 +156,12 @@ const encryptAESClient = function (data) {
     return CryptoJS.AES.encrypt(data, window.clientkey, { iv: window.iv })
 }
 
-function CryptoJSAesDecrypt(data){
-
-    var objJson = JSON.parse(data);
-
-    var encrypted = objJson.listaArquivos;
-    var salt = CryptoJS.enc.Hex.parse(objJson.salt);
-    var iv = CryptoJS.enc.Hex.parse(objJson.iv);   
-
-    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64/8, iterations: 999});
-
-    var decrypted = CryptoJS.AES.decrypt(encrypted, key, { iv: iv});
-
-    return decrypted.toString(CryptoJS.enc.Utf8);
-}
-
 /**
  * Está função é responsável por obter a chave pública do servidor.
  * Recebe como parametro uma callback, que enviará a chave AES que
  * está sendo usado pelo clientepara o servidor.
  */
-const getPublicKey = function (callback) {
+const getPublicKey = function (callback1, callback2) {
     fetch(`keyencodeserver`) // <---- mudar
         .then(
             function (response) {
@@ -175,7 +174,8 @@ const getPublicKey = function (callback) {
                     publickey = data.chave // <---- mudar para data.chave
                     vi = data.vi
                     console.log('Request succeeded to public key')
-                    callback()
+                    callback1()
+                    callback2()
                 });
             }
         )

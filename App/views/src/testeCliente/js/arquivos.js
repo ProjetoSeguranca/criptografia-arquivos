@@ -4,10 +4,9 @@
  * 
  */
 window.onload = function () {
-    getPublicKey(sendAESKey)
+    getPublicKey(sendAESKey, getFilesUser)
     cryptoFile(getFileInfo)
-    getFilesUser()
-    checarSolicitacao()
+    //checarSolicitacao()
 }
 
 function alertSend(mensagem, tipo) {
@@ -178,12 +177,13 @@ const sendFile = function () {
                 }
             }).then(retorno => {
                 checkRespJSONServer(retorno, `Arquivo salvo com sucesso`)
+                getFilesUser()
             })
             .catch((error) => {
                 alertSend(`<strong>Erro! </strong>Falha ao enviar arquivo do usuário.`, 'alert-danger')
                 openModalLoad(false)
+                getFilesUser()
             })
-        getFilesUser()
     } else {
         alertSend('<strong>Atenção! </strong>Nenhum arquivo foi selecionado para envio', 'alert-warning')
     }
@@ -222,10 +222,11 @@ const getFilesUser = function () {
         })
         .then(data => {
             window.files = JSON.parse(data)
-            insetDataFilesTable(CryptoJSAesDecrypt(window.files))
+            insetDataFilesTable(window.files)
             openModalLoad(false)
         })
         .catch((error) => {
+            console.log(error)
             alertSend(`<strong>Erro! </strong>Falha ao obter arquivos do usuário.`, 'alert-danger')
             openModalLoad(false)
         })
@@ -233,21 +234,22 @@ const getFilesUser = function () {
 
 const insetDataFilesTable = function (files) {
     const tbody = document.getElementById('tableFilesData')
-    files = Array.from(files)
+    lista = Array.from(files.listaArquivos)
+    console.log('Files: ', lista)
     tbody.innerHTML = ''
-    const rows = files.map(file => {
+    const rows = lista.map(file => {
         const tdName = document.createElement('td')
-        tdName.innerHTML = file.fileName
+        tdName.innerHTML = CryptoJSAesDecrypt(file.fileName, files.salt, files.iv)
         const tdModificationData = document.createElement('td')
-        tdModificationData.innerHTML = file.modificationData
+        tdModificationData.innerHTML = CryptoJSAesDecrypt(file.modificationData, files.salt, files.iv)
         const tdType = document.createElement('td')
-        tdType.innerHTML = file.fileType
+        tdType.innerHTML = 'arquivo'
         const tdExt = document.createElement('td')
-        tdExt.innerHTML = 'arquivo'
+        tdExt.innerHTML = CryptoJSAesDecrypt(file.fileType, files.salt, files.iv)
         const tdSize = document.createElement('td')
-        tdSize.innerHTML = file.fileSize
+        tdSize.innerHTML = CryptoJSAesDecrypt(file.fileSize, files.salt, files.iv)
         const tdActions = document.createElement('td')
-        tdActions.innerHTML = `<a onclick="deleteFile(event, '${file.idArquivo}')" class="btn btn-danger btn-xs">Excluir</a>`
+        tdActions.innerHTML = `<a onclick="deleteFile(event, '${CryptoJSAesDecrypt(file.idArquivo, files.salt, files.iv)}')" class="btn btn-danger btn-xs">Excluir</a>`
         const tr = document.createElement('tr')
         tr.appendChild(tdName)
         tr.appendChild(tdModificationData)

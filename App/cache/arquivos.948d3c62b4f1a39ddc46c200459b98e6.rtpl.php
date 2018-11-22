@@ -90,7 +90,6 @@
           <tr>
             <th>Nome</th>
             <th class="ocultar">Data de Modificação</th>
-            <th class="ocultar">Tipo</th>
             <th class="ocultar">Extensão</th>
             <th>Tamanho</th>
             <th>Ações</th>

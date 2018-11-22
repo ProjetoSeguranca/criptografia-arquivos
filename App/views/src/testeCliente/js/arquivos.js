@@ -191,8 +191,8 @@ const sendFile = function () {
 const deleteFile = function (e, id) {
     if (confirm('Confirmar exclusão do arquivo?')) {
         e.preventDefault()
-        fetch(`delete/${id}`, {
-            method: 'delete'
+        fetch(`arquivos/delete/${id}`, {
+            method: 'get'
         })
             .then(function (data) {
                 if (data.status < 300 && data.status >= 200) {
@@ -202,10 +202,12 @@ const deleteFile = function (e, id) {
                 }
             }).then(retorno => {
                 checkRespJSONServer(retorno, `Arquivo excluido com sucesso`)
+                getFilesUser()
             })
             .catch((error) => {
                 alertSend(`<strong>Erro! </strong>Falha ao excluir arquivo do usuário.`, 'alert-danger')
                 openModalLoad(false)
+                getFilesUser()
             })
     }
 }
@@ -232,6 +234,28 @@ const getFilesUser = function () {
         })
 }
 
+const downloadFile = function(id){
+    openModalLoad(true, 'Aguarde. Descriptografando arquivo para baixar...')
+    fetch(`arquivos/download/${id}`)
+        .then(resp => {
+            if (resp.status < 300 && resp.status >= 200) {
+                return resp.text()
+            } else {
+                throw true
+            }
+        })
+        .then(data => {
+            window.files = JSON.parse(data)
+            insetDataFilesTable(window.files)
+            openModalLoad(false)
+        })
+        .catch((error) => {
+            console.log(error)
+            alertSend(`<strong>Erro! </strong>Falha ao baixar arquivo`, 'alert-danger')
+            openModalLoad(false)
+        })
+}
+
 const insetDataFilesTable = function (files) {
     const tbody = document.getElementById('tableFilesData')
     lista = Array.from(files.listaArquivos)
@@ -239,11 +263,12 @@ const insetDataFilesTable = function (files) {
     tbody.innerHTML = ''
     const rows = lista.map(file => {
         const tdName = document.createElement('td')
-        tdName.innerHTML = CryptoJSAesDecrypt(file.fileName, files.salt, files.iv)
+        const tdNameLink = document.createElement('a')
+        tdNameLink.setAttribute('onclick', `downloadFile('${CryptoJSAesDecrypt(file.idArquivo, files.salt, files.iv)}')`)
+        tdNameLink.innerHTML = CryptoJSAesDecrypt(file.fileName, files.salt, files.iv)
+        tdName.appendChild(tdNameLink)
         const tdModificationData = document.createElement('td')
         tdModificationData.innerHTML = CryptoJSAesDecrypt(file.modificationData, files.salt, files.iv)
-        const tdType = document.createElement('td')
-        tdType.innerHTML = 'arquivo'
         const tdExt = document.createElement('td')
         tdExt.innerHTML = CryptoJSAesDecrypt(file.fileType, files.salt, files.iv)
         const tdSize = document.createElement('td')
@@ -253,7 +278,6 @@ const insetDataFilesTable = function (files) {
         const tr = document.createElement('tr')
         tr.appendChild(tdName)
         tr.appendChild(tdModificationData)
-        tr.appendChild(tdType)
         tr.appendChild(tdExt)
         tr.appendChild(tdSize)
         tr.appendChild(tdActions)

@@ -141,6 +141,13 @@ table tr th {
     width: 16.66%;
 }
 
+table tr td {
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .formEnviar{
     display: flex;
     flex-wrap: wrap;
@@ -165,9 +172,6 @@ table tr th {
         display: none;
     }
     #tableFilesData tr td:nth-child(3){
-        display: none;
-    }
-    #tableFilesData tr td:nth-child(4){
         display: none;
     }
 }

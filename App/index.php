@@ -170,6 +170,33 @@ $app->get("/arquivos/delete/{idArquivo}",function(Requests $request,Response $re
 	}
 });
 
+$app->post('/arquivos/download',function(){
+	Users::verifyLogin();
+	$json = file_get_contents('php://input');
+	$results = json_decode($json,true);
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$idArquivo = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']);
+	$user = new Users();
+	$data = $user->getFileForId($idArquivo);
+	$dirUser = "./users/".$_SESSION['User']['deslogin'];
+	$dirArquivo = $dirUser . "/" . $data['fileName'];
+	$file  = file_get_contents($dirArquivo);
+	$fileDecrypted = $user->decryptedFile($file);
+	$salt = $user->generatedSalt();
+	$iv = $user->generatedIV();
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$fileCryptJs =  base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$fileDecrypted));
+	$nomeArquivo =  base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$data['fileName']));
+
+	return json_encode(array(
+		"fileContent"=> $fileCryptJs,
+		"fileName" => $nomeArquivo,
+		"iv"=> $iv,
+		"salt" => $salt
+	));
+});
+
+
 $app->run();
 
 

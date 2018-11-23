@@ -29,10 +29,8 @@ function openModalLoad(flag, msg = `<p>Aguarde...</p>`) {
         modal.style.zIndex = '2000'
         box.style.display = 'block'
     } else {
-        setTimeout(() => {
-            box.style.display = 'none'
-            modal.style.zIndex = '-1'
-        }, 1000)
+        box.style.display = 'none'
+        modal.style.zIndex = '-1'
     }
 }
 
@@ -130,9 +128,11 @@ const cryptoFile = async function (callback) {
         var fileSelected = document.getElementById('file');
         fileSelected.addEventListener('change', function (e) {
             var fileTobeRead = fileSelected.files[0];
+            console.log(fileSelected.files[0].type)
             var fileReader = new FileReader();
             openModalLoad(true, 'Aguarde. Criptografando o arquivo...')
             fileReader.onload = function (e) {
+                console.log(fileReader.result)
                 callback(CryptoJSAESEncryptFile({
                     content: fileReader.result,
                     fileName: fileSelected.files[0].name
@@ -263,10 +263,10 @@ const downloadFile = function (id) {
 }
 
 const construirArquivo = function (data) {
-    const decryptedFileContent = CryptoJSAesDecrypt(data.resp.fileContent, data.resp.salt, data.resp.iv)
+    const decryptedFileContent = CryptoJSAesDecryptFile(data.resp.fileContent, data.resp.salt, data.resp.iv)
     const decryptedFileName = CryptoJSAesDecrypt(data.resp.fileName, data.resp.salt, data.resp.iv)
 
-    const dataURL = `data:application/octet-stream,${encodeURIComponent(decryptedFileContent)}`
+    const dataURL = `data:application/octet-stream;base64,${decryptedFileContent}`
 
     const elementLink = document.createElement("a")
     elementLink.download = decryptedFileName

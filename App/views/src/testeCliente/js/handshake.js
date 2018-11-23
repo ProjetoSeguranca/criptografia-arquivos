@@ -140,6 +140,20 @@ function CryptoJSAesDecrypt(data, salt1, iv1) {
     return decrypted.toString(CryptoJS.enc.Utf8);
 }
 
+function CryptoJSAesDecryptFile(data, salt1, iv1) {
+
+    var encrypted = data;
+
+    var salt = CryptoJS.enc.Hex.parse(salt1);
+    var iv = CryptoJS.enc.Hex.parse(iv1);
+
+    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
+
+    var decrypted = CryptoJS.AES.decrypt(encrypted, key, { iv: iv });
+
+    return decrypted.toString(CryptoJS.enc.Base64);
+}
+
 /**
  * Está função criptografa a chave AES gerada pelo cliente com a chave
  * pública do servidor. Esta função é utiizada para enviar a chave AES

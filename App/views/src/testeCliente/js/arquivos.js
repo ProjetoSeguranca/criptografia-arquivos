@@ -415,11 +415,19 @@ const sendCompartilhamento = function (e) {
     const loginCompart = document.getElementById('loginCompart')
     const fileCompart = document.getElementsByName('fileCompart')
     if (validarFormCompart(loginCompart, fileCompart)) {
+        let itemRadio = undefined
+        fileCompart.forEach(e => {
+            if (e.checked) {
+                itemRadio = e
+            }
+        })
         const dadosEncrypted = CryptoJSAESEncryptSC({
             nomeDestinatario: loginCompart.value,
-            idArquivo: fileCompart[0].value
+            idArquivo: itemRadio.value
         })
-        console.log(JSON.stringify(dadosEncrypted))
+        console.log('Decriptografado dest: ', CryptoJSAesDecrypt(dadosEncrypted.nomeDestinatario, dadosEncrypted.salt, dadosEncrypted.iv))
+        console.log('Decriptografado id..: ', CryptoJSAesDecrypt(dadosEncrypted.idArquivo, dadosEncrypted.salt, dadosEncrypted.iv))
+        
         fetch('compartilhar/arquivo', {
             method: 'post',
             headers: {
@@ -433,11 +441,12 @@ const sendCompartilhamento = function (e) {
                 }
             })
             .then(retorno => {
-                console.log(retorno)
+                console.log('Resposta do servidor',retorno)
                 openModalCompartilhar(false, e)
                 checkRespJSONServer(retorno, `Arquivo compartilhado`)
             })
             .catch((error) => {
+                console.log('Erro: ',error)
                 openModalCompartilhar(false)
                 alertSend(`<strong>Erro! </strong>Falha ao compartilhar arquivo`, 'alert-danger')
             })

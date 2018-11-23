@@ -195,9 +195,6 @@ $app->post('/arquivos/download',function(){
 	));
 });
 
-$app->get('/teste',function(){
-	
-});
 
 $app->post('/compartilhar/arquivo',function(){
 	Users::verifyLogin();
@@ -212,15 +209,15 @@ $app->post('/compartilhar/arquivo',function(){
 	$list = $user->getUserForDeslogin($nome); 
 	if($list != null){
 		$user->sharingRecorder($_SESSION['User']['iduser'], $list, $idarquivo);
-		return json_encode(array(
-			"msg" => "Sucesso"
-		));
 	}
-	if($data === null){
+	if($list === null){
 		return json_encode(array(
 			"msg" => "Falha"
 		));
 	}
+	return json_encode(array(
+			"msg" => "Sucesso"
+		));
 });
 
 $app->get('/compartilhar/arquivo/checar',function(){

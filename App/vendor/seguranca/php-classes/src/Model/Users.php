@@ -292,7 +292,13 @@ class Users extends Model{
 
 		$file = $this->decryptedFile($fileContent ,$idRemetente);
 
-		$fileEncrypted = $this->encryptFile($file,$idDestinatario);
+		//$fileEncrypted = $this->encryptFile($file,$idDestinatario);
+		$results = $data[0];
+		$chaveAES = $destinatario['AESKey'];
+		$encryption_key = base64_decode($chaveAES);
+		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+		$code = openssl_encrypt($file,'aes-256-cbc',$encryption_key,0,$iv);
+		$fileEncrypted = base64_encode($code.'::'.$iv);
 
 		$this->insertFile($data['fileName'] , $fileEncrypted , $destinatario['deslogin']);
 	}
@@ -309,6 +315,11 @@ class Users extends Model{
 			));
 			$result = $results[0];
 			$this->cryptForSharing($result['idRemetente'] , $result['idDestinatario'], $result['idArquivo']);
+		}
+		if($confirm ===false){
+			$sql->query("DELETE FROM arquivos_compartilhados WHERE idCompartilhamento = :idcompartilhamento",array(
+				":idcompartilhamento"=>$idcompartilhamento
+			));
 		}
 	}
 

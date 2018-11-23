@@ -417,7 +417,7 @@ const sendCompartilhamento = function (e) {
     if (validarFormCompart(loginCompart, fileCompart)) {
         const dadosEncrypted = CryptoJSAESEncryptSC({
             nomeDestinatario: loginCompart.value,
-            idArquivo: fileCompart.value
+            idArquivo: fileCompart[0].value
         })
         console.log(JSON.stringify(dadosEncrypted))
         fetch('compartilhar/arquivo', {

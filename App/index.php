@@ -150,10 +150,7 @@ $app->get('/listar/arquivos',function(){
 	));
 });
 
-$app->get('/teste',function(){
-		
-	
-});
+
 
 $app->get("/arquivos/delete/{idArquivo}",function(Requests $request,Response $response,array $args){
 	Users::verifyLogin();
@@ -198,11 +195,18 @@ $app->post('/arquivos/download',function(){
 	));
 });
 
+$app->get('/teste',function(){
+	
+});
+
 $app->post('/compartilhar/arquivo',function(){
 	Users::verifyLogin();
+	$user = new Users();
 	$json = file_get_contents('php://input');
 	$results = json_decode($json,true);
+	
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+
 	$nome = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['nomeDestinatario']);
 	$idarquivo =  Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idArquivo']);
 	$list = $user->getUserForDeslogin($nome); 

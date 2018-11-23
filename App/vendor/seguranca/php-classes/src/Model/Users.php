@@ -257,13 +257,13 @@ class Users extends Model{
 	public function getUserForDeslogin($deslogin){
 		$user = hash("sha512",$deslogin,false);
 		$sql = new Sql();
-		$results = $sql->select("SELECT iduser FROM users WHERE deslogin = :deslogin",array(
+		$results = $sql->select("SELECT * FROM users WHERE deslogin = :deslogin",array(
 			":deslogin" => $user
 		));
 		foreach ($results as $key => $value) {
 			$data = $value;
 		}
-		return $data;
+		return $data['iduser'];
 	}
 
 	public function sharingRecorder($remetente, $destinatario, $arquivo){

@@ -236,7 +236,7 @@ const getFilesUser = function () {
 
 const downloadFile = function (id) {
     openModalLoad(true, 'Aguarde. Descriptografando o arquivo para baixar...')
-    fetch(`arquivos/download/`, {
+    fetch(`arquivos/download`, {
         method: 'post',
         headers: {
             "Content-type": "application/json; charset=utf-8"
@@ -251,11 +251,8 @@ const downloadFile = function (id) {
             }
         })
         .then(data => {
-            const file = JSON.parse(data)
-            construirArquivo({
-                id,
-                resp
-            })
+            const resp = JSON.parse(data)
+            construirArquivo({ id, resp })
             openModalLoad(false)
         })
         .catch((error) => {
@@ -269,14 +266,19 @@ const construirArquivo = function (data) {
     const decryptedFileContent = CryptoJSAesDecrypt(data.resp.fileContent, data.resp.salt, data.resp.iv)
     const decryptedFileName = CryptoJSAesDecrypt(data.resp.fileName, data.resp.salt, data.resp.iv)
 
-    const elementLink = document.getElementById(`file${data.id}`)
+    const dataURL = `data:application/octet-stream,${encodeURIComponent(decryptedFileContent)}`
 
-    const dataURL = `data:application/octet-stream,${decryptedFileContent}`
-
+    const elementLink = document.createElement("a")
     elementLink.download = decryptedFileName
     elementLink.target = '_blank'
     elementLink.href = dataURL
+
+    document.body.appendChild(elementLink)
+
     elementLink.click()
+
+    document.body.removeChild(elementLink);
+    delete elementLink;
 }
 
 const insetDataFilesTable = function (files) {

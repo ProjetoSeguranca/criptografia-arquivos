@@ -81,8 +81,8 @@ function CryptoJSAESEncryptSC(data) {
     console.log('Criptografado id..: ', idArquivo)
 
     return {
-        nomeDestinatario,
-        idArquivo,
+        nomeDestinatario: nomeDestinatario,
+        idArquivo: idArquivo,
         key: encryptPublicKey(window.clientkey),
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),

@@ -114,14 +114,15 @@ $app->post('/upload',function(){
 	$fileName = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']['fileName']);
 	$fileContent = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']['fileContent']);
 	$user = new Users();
-	$data = $user->encryptFile($fileContent);
-	Users::insertFile($fileName , $data);
+	$data = $user->encryptFile($fileContent, $_SESSION['User']['iduser']);
+	Users::insertFile($fileName , $data, $_SESSION['User']['deslogin']);
 	$_SESSION['data'] = $data;
 	return Users::returnSucess();
 });
 
 
 $app->get('/listar/arquivos',function(){
+	Users::verifyLogin();
 	$user = new Users();
 	$data = $user->listFilesUser($_SESSION['User']['iduser']);
 	$salt = $user->generatedSalt();
@@ -150,11 +151,12 @@ $app->get('/listar/arquivos',function(){
 });
 
 $app->get('/teste',function(){
-
+		
 	
 });
 
 $app->get("/arquivos/delete/{idArquivo}",function(Requests $request,Response $response,array $args){
+	Users::verifyLogin();
 	$user = new Users();
 	$data = $user->getFileForId($args['idArquivo']);
 	if($data!= null){
@@ -181,7 +183,7 @@ $app->post('/arquivos/download',function(){
 	$dirUser = "./users/".$_SESSION['User']['deslogin'];
 	$dirArquivo = $dirUser . "/" . $data['fileName'];
 	$file  = file_get_contents($dirArquivo);
-	$fileDecrypted = $user->decryptedFile($file);
+	$fileDecrypted = $user->decryptedFile($file , $_SESSION['User']['iduser']);
 	$salt = $user->generatedSalt();
 	$iv = $user->generatedIV();
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
@@ -196,7 +198,83 @@ $app->post('/arquivos/download',function(){
 	));
 });
 
+$app->post('/compartilhar/arquivo',function(){
+	Users::verifyLogin();
+	$json = file_get_contents('php://input');
+	$results = json_decode($json,true);
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$nome = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['nomeDestinatario']);
+	$idarquivo =  Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idArquivo']);
+	$list = $user->getUserForDeslogin($nome); 
+	if($list != null){
+		$user->sharingRecorder($_SESSION['User']['iduser'], $list, $idarquivo);
+		return json_encode(array(
+			"msg" => "Sucesso"
+		));
+	}
+	if($data === null){
+		return json_encode(array(
+			"msg" => "Falha"
+		));
+	}
+});
 
+$app->get('/compartilhar/arquivo/checar',function(){
+	Users::verifyLogin();
+	$user = new Users();
+	$data = $user->listSharing($_SESSION['User']['iduser']);
+	$salt = $user->generatedSalt();
+	$iv = $user->generatedIV();
+
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+
+	$dataEncrypt = array();
+	foreach ($data as $key => $value) {
+		$aux = array('idCompartilhamento' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['idCompartilhamento'])),
+		'nomeRemetente' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['nomeRemetente'])),
+		'idArquivo' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['idarquivo'])),
+		'fileName' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['fileName'])),
+		'fileSize' => base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$value['fileSize']))
+		 );
+
+		array_push($dataEncrypt, $aux);	
+	}
+	
+	return json_encode(array(
+		"listaCompartilhamentos" => $dataEncrypt,
+		"salt" => $salt,
+		"iv" => $iv
+	));
+});
+
+$app->post('/compartilhar/arquivo/aceitar',function(){
+	Users::verifyLogin();
+	$json = file_get_contents('php://input');
+	$results = json_decode($json,true);
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$idcompartilhamento = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idCompartilhamento']);
+	$idarquivo = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idArquivo']);
+	$user = new Users();
+	$user->confirmSharing(true, $idcompartilhamento, $idarquivo);
+	return Users::returnSucess();
+});
+
+$app->post('/compartilhar/arquivo/negar',function(){
+	Users::verifyLogin();
+	$json = file_get_contents('php://input');
+	$results = json_decode($json,true);
+	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$idcompartilhamento = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idCompartilhamento']);
+	$idarquivo = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idArquivo']);
+	$user = new Users();
+	$user->confirmSharing(false, $idcompartilhamento, $idarquivo);
+	return Users::returnSucess();
+});
+
+$app->get('/logout',function(Requests $request,Response $response,array $args){
+	Users::logout();
+	return $response->withRedirect('/', 301);
+});
 $app->run();
 
 

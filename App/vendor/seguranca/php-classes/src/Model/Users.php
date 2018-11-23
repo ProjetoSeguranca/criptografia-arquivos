@@ -49,6 +49,11 @@ class Users extends Model{
 			exit();
 		}
 	}
+
+	public static function logout()
+	{
+		$_SESSION[Users::SESSION] = NULL;
+	}
  // esta função ainda não está sendo utilizada ainda 
 	public static function save($login,$email,$pass){
 
@@ -109,9 +114,9 @@ class Users extends Model{
 	    return $decrypted;
 
 	}
-	public static function insertFile($fileName , $data){
+	public static function insertFile($fileName , $data , $deslogin){
 		
-		$dirUser = "./users/".$_SESSION['User']['deslogin'];
+		$dirUser = "./users/".$deslogin;
 		$dir = $dirUser . "/" . $fileName;
 		file_put_contents($dir, $data);
 		$type = explode(".", $fileName);
@@ -162,7 +167,7 @@ class Users extends Model{
     	return $result;
 	}
 
-	public  function encryptFile($fileContent){
+	public  function encryptFile($fileContent,$iduser){
 		$file = explode(',', $fileContent);
 		$dataDecrypted = base64_decode($file[1]);
 		$sql = new Sql();
@@ -177,10 +182,10 @@ class Users extends Model{
 		return $result;
 	}
 
-	public function decryptedFile($data){
+	public function decryptedFile($data ,$iduser){
 		$sql = new Sql();
 		$chave = $sql->select("SELECT * FROM  users WHERE iduser = :iduser",array(
-			':iduser'=>$_SESSION['User']['iduser'])); 
+			':iduser'=>$iduser)); 
 		//$result= $sql->select("SELECT * FROM  arquivos WHERE idarquivo = 3");
 		//$arquivo = $result[0]['fileName'];
 		$results = $chave[0];
@@ -247,7 +252,80 @@ class Users extends Model{
 		$sql->query("DELETE FROM arquivos WHERE idArquivo = :idarquivo",array(
 			":idarquivo" => $idarquivo
 		));
-	
+	}
+
+	public function getUserForDeslogin($deslogin){
+		$user = hash("sha512",$deslogin,false);
+		$sql = new Sql();
+		$results = $sql->select("SELECT iduser FROM users WHERE deslogin = :deslogin",array(
+			":deslogin" => $user
+		));
+		foreach ($results as $key => $value) {
+			$data = $value;
+		}
+		return $data;
+	}
+
+	public function sharingRecorder($remetente, $destinatario, $arquivo){
+		$sql = new Sql();
+		$sql->query("INSERT INTO arquivos_compartilhados(idRemetente, idDestinatario, idArquivo, nomeRemetente) VALUES(:idRemetente, :idDestinatario, :idArquivo,:nomeremetente)",array(
+			":idRemetente" => $remetente, 
+			":idDestinatario" => $destinatario, 
+			":idArquivo" => $arquivo,
+			":nomeremetente" =>$_SESSION["desuser"]
+		));
+	}
+
+	public function cryptForSharing($idRemetente , $idDestinatario, $idarquivo){
+		//decriptografar
+		$sql = new Sql();
+		$chave = $sql->select("SELECT * FROM  users WHERE iduser = :iduser",array(
+			':iduser'=>$idRemetente));
+		$dest = $sql->select("SELECT * FROM  users WHERE iduser = :iduser",array(
+			':iduser'=>$idDestinatario));
+		$data = $this->getFileForId($idarquivo);
+		$results = $chave[0];
+		$destinatario = $dest[0];
+		$dirUser = "./users/".$results['deslogin'];
+		$dirArquivo = $dirUser . "/" . $data['fileName'];
+		$fileContent  = file_get_contents($dirArquivo); 
+
+		$file = $this->decryptedFile($fileContent ,$idRemetente);
+
+		$fileEncrypted = $this->encryptFile($file,$idDestinatario);
+
+		$this->insertFile($data['fileName'] , $fileEncrypted , $destinatario['deslogin']);
+	}
+
+	public function confirmSharing($confirm , $idcompartilhamento , $idarquivo){
+		$sql = new Sql();
+		$sql->query("UPDATE arquivos_compartilhados SET statusCompartilhamento = :status WHERE idCompartilhamento = :idcompartilhamento" , array(
+			":status" =>$confirm,
+			":idcompartilhamento" =>$idcompartilhamento
+		));
+		if($confirm === true){
+			$results = $sql->select("SELECT * FROM arquivos_compartilhados WHERE idCompartilhamento = :idcompartilhamento",array(
+				":idcompartilhamento" =>$idcompartilhamento
+			));
+			$result = $results[0];
+			$this->cryptForSharing($result['idRemetente'] , $result['idDestinatario'], $result['idArquivo']);
+		}
+	}
+
+	public function listSharing($iduser){
+		$sql = new Sql();
+		$results = $sql->select("SELECT ac.idCompartilhamento  , ac.nomeRemetente ,ac.idarquivo , a.fileName , a.fileSize, ac.statusCompartilhamento 
+			FROM arquivos_compartilhados as ac  INNER JOIN arquivos as a ON a.idarquivo = ac.idarquivo 
+			WHERE ac.idDestinatario = :idDestinatario",array(
+			":idDestinatario" => $iduser
+		));
+		$aux = array();
+		foreach ($results as $key => $value) {
+			if($value['statusCompartilhamento'] === NULL){
+				array_push($aux, $value);
+			}
+		}
+		return $aux;
 	}
 }
 

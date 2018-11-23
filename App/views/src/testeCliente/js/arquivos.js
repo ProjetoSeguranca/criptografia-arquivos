@@ -251,11 +251,10 @@ const downloadFile = function (id) {
             }
         })
         .then(data => {
-            const fileContent = JSON.parse(data)
+            const file = JSON.parse(data)
             construirArquivo({
                 id,
-                fileName,
-                fileContent
+                resp
             })
             openModalLoad(false)
         })
@@ -267,12 +266,14 @@ const downloadFile = function (id) {
 }
 
 const construirArquivo = function (data) {
-    const decryptedFileContent = CryptoJSAesDecrypt(data.fileContent, data.salt, data)
-    const decryptedFileName = CryptoJSAesDecrypt(data.fileName, data.salt, data)
+    const decryptedFileContent = CryptoJSAesDecrypt(data.resp.fileContent, data.resp.salt, data.resp.iv)
+    const decryptedFileName = CryptoJSAesDecrypt(data.resp.fileName, data.resp.salt, data.resp.iv)
+
+    const elementLink = document.getElementById(`file${data.id}`)
 
     const dataURL = `data:application/octet-stream,${decryptedFileContent}`
-    const elementLink = document.getElementById(`file${data.id}`)
-    elementLink.download = data.decryptedFileName
+
+    elementLink.download = decryptedFileName
     elementLink.target = '_blank'
     elementLink.href = dataURL
     elementLink.click()

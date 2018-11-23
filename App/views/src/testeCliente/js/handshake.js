@@ -65,10 +65,6 @@ function CryptoJSAESEncryptSC(data) {
 
     var salt = CryptoJS.lib.WordArray.random(256);
     var iv = CryptoJS.lib.WordArray.random(16);
-
-    console.log('Chave AES de criptografia: ', window.clientkey)
-    console.log('Chave AES de criptografia (Criptografada com chave pública): ', encryptPublicKey(window.clientkey))
-
     var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
 
     var nomeDestinatarioEncrypted = CryptoJS.AES.encrypt(data.nomeDestinatario, key, { iv: iv });
@@ -77,16 +73,33 @@ function CryptoJSAESEncryptSC(data) {
     const nomeDestinatario = CryptoJS.enc.Base64.stringify(nomeDestinatarioEncrypted.ciphertext)
     const idArquivo = CryptoJS.enc.Base64.stringify(idArquivoEncrypted.ciphertext)
 
-    console.log('Criptografado dest: ', nomeDestinatario)
-    console.log('Criptografado id..: ', idArquivo)
-
     return {
         nomeDestinatario: nomeDestinatario,
         idArquivo: idArquivo,
-        key: encryptPublicKey(window.clientkey),
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
         hash: CryptoJS.SHA256(JSON.stringify({ nomeDestinatario, idArquivo })).toString()
+    }
+}
+
+function CryptoJSAESEncryptIDs(idCompartilhamento, idArquivo) {
+
+    var salt = CryptoJS.lib.WordArray.random(256);
+    var iv = CryptoJS.lib.WordArray.random(16);
+    var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
+
+    var idCompartilhamentoEncrypted = CryptoJS.AES.encrypt(`${idCompartilhamento}`, key, { iv: iv });
+    var idArquivoEncrypted = CryptoJS.AES.encrypt(`${idArquivo}`, key, { iv: iv });
+
+    idCompartilhamento = CryptoJS.enc.Base64.stringify(idCompartilhamentoEncrypted.ciphertext)
+    idArquivo = CryptoJS.enc.Base64.stringify(idArquivoEncrypted.ciphertext)
+
+    return {
+        idCompartilhamento: idCompartilhamento,
+        idArquivo: idArquivo,
+        salt: CryptoJS.enc.Hex.stringify(salt),
+        iv: CryptoJS.enc.Hex.stringify(iv),
+        hash: CryptoJS.SHA256(JSON.stringify({ idCompartilhamento, idArquivo })).toString()
     }
 }
 

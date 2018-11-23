@@ -48,9 +48,8 @@
     <div id="formSolicitacao">
       <h3>Solicitação de compartilhamento</h3>
       <p id="msgSolicitacao"></p>
-      <input type="hidden" id="idSolicitacao">
-      <button onclick="solicitacaoCompart(true)" class="btn btn-success">Aceitar</button>
-      <button onclick="solicitacaoCompart(false)" class="btn btn-danger">Recusar</button>
+      <button class="btn btn-success">Aceitar</button>
+      <button class="btn btn-danger">Recusar</button>
     </div>
   </div>
   <nav class="navbar navbar-inverse navbar-fixed-top">

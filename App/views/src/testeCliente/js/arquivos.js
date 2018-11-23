@@ -6,7 +6,7 @@
 window.onload = function () {
     getPublicKey(sendAESKey, getFilesUser)
     cryptoFile(getFileInfo)
-    //checarSolicitacao()
+    checarSolicitacao()
 }
 
 function alertSend(mensagem, tipo) {
@@ -92,13 +92,17 @@ const openModalSolicitacao = function (data, flag = true) {
     const modal = document.getElementById('solicitacao')
     const box = document.getElementById('formSolicitacao')
     const pMsg = document.getElementById('msgSolicitacao')
-    const idSolicitacao = document.getElementById('idSolicitacao')
+    const botoes = document.querySelectorAll('#formSolicitacao button')
 
     if (flag == true) {
-        if (data.existe == true) {
+        if (data.listaCompartilhamentos.length > 0) {
+            const itemLista = data.listaCompartilhamentos[0]
+            botoes[0].setAttribute('onclick', `solicitacaoCompart(true,${CryptoJSAesDecrypt(itemLista.idCompartilhamento, data.salt, data.iv)},${CryptoJSAesDecrypt(itemLista.idArquivo, data.salt, data.iv)})`)
+            botoes[1].setAttribute('onclick', `solicitacaoCompart(false,${CryptoJSAesDecrypt(itemLista.idCompartilhamento, data.salt, data.iv)},${CryptoJSAesDecrypt(itemLista.idArquivo, data.salt, data.iv)})`)
             window.checar = false
-            pMsg.innerHTML = `<strong>${data.user}</strong>, gostaria de compartilhar o arquivo <strong>${data.arquivo}</strong> com você.`
-            idSolicitacao.value = data.idConvite
+            pMsg.innerHTML = `<strong>Remetente:</strong> ${CryptoJSAesDecrypt(itemLista.nomeRemetente, data.salt, data.iv)}<br>
+                              <strong>Nome do arquivo:</strong> ${CryptoJSAesDecrypt(itemLista.fileName, data.salt, data.iv)}<br>
+                              <strong>Tamanho do arquivo:</strong> ${CryptoJSAesDecrypt(itemLista.fileSize, data.salt, data.iv)}`
             modal.style.zIndex = '2000'
             box.style.display = 'block'
         }
@@ -283,7 +287,6 @@ const construirArquivo = function (data) {
 const insetDataFilesTable = function (files) {
     const tbody = document.getElementById('tableFilesData')
     lista = Array.from(files.listaArquivos)
-    console.log('Files: ', lista)
     tbody.innerHTML = ''
     const rows = lista.map(file => {
         const tdName = document.createElement('td')
@@ -339,36 +342,38 @@ const checarSolicitacao = function () {
                 })
                 .then(retorno => {
                     const r = JSON.parse(retorno)
-                    console.log('Retorno: ', r)
                     openModalSolicitacao(r)
                 })
         }
     }, 5000)
 }
 
-const solicitacaoCompart = function (flag = true) {
+const solicitacaoCompart = function (flag = true, idSolicitacao, idArquivo) {
     window.checar = true
     const modal = document.getElementById('solicitacao')
     const box = document.getElementById('formSolicitacao')
-    const idSolicitacao = document.getElementById('idSolicitacao')
+    const botoes = document.querySelectorAll('#formSolicitacao button')
 
+    botoes[0].removeAttribute('onclick')
+    botoes[1].removeAttribute('onclick')
     box.style.display = 'none'
     modal.style.zIndex = '-1'
+
     if (flag == true) {
-        transUserToUser(idSolicitacao.value)
+        transUserToUser(idSolicitacao, idArquivo)
     } else {
-        deleteCompart(idSolicitacao.value)
+        deleteCompart(idSolicitacao, idArquivo)
     }
 }
 
-const transUserToUser = function (idCompart) {
-    const idEncrypted = CryptoJSAESEncryptId(`${idCompart}`)
-    fetch('/compartilhar/arquivo/aceitar', {
+const transUserToUser = function (idSolicitacao, idArquivo) {
+    const idsEncrypted = CryptoJSAESEncryptIDs(idSolicitacao, idArquivo)
+    fetch('compartilhar/arquivo/aceitar', {
         method: 'post',
         headers: {
-            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            "Content-type": "application/json; charset=utf-8"
         },
-        body: `data=${idEncrypted.data}&salt=${idEncrypted.salt}&iv=${idEncrypted.iv}&hash=${idEncrypted.hash}`
+        body: JSON.stringify(idsEncrypted)
     })
         .then(data => {
             if (data.status < 300 && data.status >= 200) {
@@ -378,22 +383,23 @@ const transUserToUser = function (idCompart) {
             }
         })
         .then(retorno => {
-            checkRespJSONServer(retorno, `Arquivo salvo`)
+            checkRespJSONServer(retorno, `Arquivo compartilhado salvo`)
             getFilesUser()
         })
         .catch((error) => {
-            alertSend(`<strong>Erro! </strong>Falha ao salvar arquivo`, 'alert-danger')
+            console.log('Erro: ', error)
+            alertSend(`<strong>Erro! </strong>Falha ao salvar arquivo compartilhado`, 'alert-danger')
         })
 }
 
-const deleteCompart = function (idCompart) {
-    const idEncrypted = CryptoJSAESEncryptId(`${idCompart}`)
-    fetch('/compartilhar/arquivo/negar', {
+const deleteCompart = function (idSolicitacao, idArquivo) {
+    const idsEncrypted = CryptoJSAESEncryptIDs(idSolicitacao, idArquivo)
+    fetch('compartilhar/arquivo/negar', {
         method: 'post',
         headers: {
-            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            "Content-type": "application/json; charset=utf-8"
         },
-        body: `data=${idEncrypted.data}&salt=${idEncrypted.salt}&iv=${idEncrypted.iv}&hash=${idEncrypted.hash}`
+        body: JSON.stringify(idsEncrypted)
     })
         .then(data => {
             if (data.status < 300 && data.status >= 200) {
@@ -403,10 +409,11 @@ const deleteCompart = function (idCompart) {
             }
         })
         .then(retorno => {
-            checkRespJSONServer(retorno, `Solicitação recusada`)
+            checkRespJSONServer(retorno, `Solicitação de compartilhamento recusada`)
         })
         .catch((error) => {
-            alertSend(`<strong>Erro! </strong>Falha ao enviar dados para o servidor`, 'alert-danger')
+            console.log('Erro: ', error)
+            alertSend(`<strong>Erro! </strong>Falha ao recusar arquivo compartilhado`, 'alert-danger')
         })
 }
 
@@ -425,9 +432,7 @@ const sendCompartilhamento = function (e) {
             nomeDestinatario: loginCompart.value,
             idArquivo: itemRadio.value
         })
-        console.log('Decriptografado dest: ', CryptoJSAesDecrypt(dadosEncrypted.nomeDestinatario, dadosEncrypted.salt, dadosEncrypted.iv))
-        console.log('Decriptografado id..: ', CryptoJSAesDecrypt(dadosEncrypted.idArquivo, dadosEncrypted.salt, dadosEncrypted.iv))
-        
+
         fetch('compartilhar/arquivo', {
             method: 'post',
             headers: {
@@ -441,12 +446,11 @@ const sendCompartilhamento = function (e) {
                 }
             })
             .then(retorno => {
-                console.log('Resposta do servidor',retorno)
                 openModalCompartilhar(false, e)
                 checkRespJSONServer(retorno, `Arquivo compartilhado`)
             })
             .catch((error) => {
-                console.log('Erro: ',error)
+                console.log('Erro: ', error)
                 openModalCompartilhar(false)
                 alertSend(`<strong>Erro! </strong>Falha ao compartilhar arquivo`, 'alert-danger')
             })

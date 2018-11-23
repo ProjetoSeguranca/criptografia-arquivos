@@ -67,7 +67,7 @@
         <ul class="nav navbar-nav">
           <li class="active"><a>Meus arquivos</a></li>
           <li><a href="#" onclick="openModalCompartilhar();">Compartilhar</a></li>
-          <li><a href="/"><span class="glyphicon glyphicon-log-out"></span> Sair</a></li>
+          <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Sair</a></li>
         </ul>
       </div>
     </div>

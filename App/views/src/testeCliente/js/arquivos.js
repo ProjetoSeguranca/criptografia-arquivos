@@ -116,6 +116,7 @@ const checkRespJSONServer = function (retorno, msg) {
         openModalLoad(false)
         return
     } else {
+        console.log(r.msg)
         throw true
     }
 }
@@ -128,11 +129,9 @@ const cryptoFile = async function (callback) {
         var fileSelected = document.getElementById('file');
         fileSelected.addEventListener('change', function (e) {
             var fileTobeRead = fileSelected.files[0];
-            console.log(fileSelected.files[0].type)
             var fileReader = new FileReader();
             openModalLoad(true, 'Aguarde. Criptografando o arquivo...')
             fileReader.onload = function (e) {
-                console.log(fileReader.result)
                 callback(CryptoJSAESEncryptFile({
                     content: fileReader.result,
                     fileName: fileSelected.files[0].name
@@ -317,10 +316,10 @@ const insetDataFilesTable = function (files) {
 const insetDataFilesShare = function () {
     const lista = document.getElementById('listaArquivos')
     lista.innerHTML = ''
-    const files = Array.from(window.files)
+    const files = Array.from(window.files.listaArquivos)
     const spans = files.map((file) => {
         const span = document.createElement('span')
-        span.innerHTML = `<span><input type="radio" name="fileCompart" value="${file.name}">${file.name}</span>`
+        span.innerHTML = `<span><input type="radio" name="fileCompart" value="${CryptoJSAesDecrypt(file.idArquivo, window.files.salt, window.files.iv)}"> ${CryptoJSAesDecrypt(file.fileName, window.files.salt, window.files.iv)}</span>`
         return span
     })
     spans.forEach(span => {
@@ -332,7 +331,7 @@ const checarSolicitacao = function () {
     window.checar = true
     setInterval(() => {
         if (window.checar == true) {
-            fetch('/compartilhar/arquivo/checar')
+            fetch('compartilhar/arquivo/checar')
                 .then(data => {
                     if (data.status < 300 && data.status >= 200) {
                         return data.text()
@@ -340,6 +339,7 @@ const checarSolicitacao = function () {
                 })
                 .then(retorno => {
                     const r = JSON.parse(retorno)
+                    console.log('Retorno: ', r)
                     openModalSolicitacao(r)
                 })
         }
@@ -416,15 +416,16 @@ const sendCompartilhamento = function (e) {
     const fileCompart = document.getElementsByName('fileCompart')
     if (validarFormCompart(loginCompart, fileCompart)) {
         const dadosEncrypted = CryptoJSAESEncryptSC({
-            login: loginCompart.value,
-            fileName: fileCompart.value
+            nomeDestinatario: loginCompart.value,
+            idArquivo: fileCompart.value
         })
-        fetch('/compartilhar/arquivo', {
+        console.log(JSON.stringify(dadosEncrypted))
+        fetch('compartilhar/arquivo', {
             method: 'post',
             headers: {
-                "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+                "Content-type": "application/json; charset=utf-8"
             },
-            body: `login=${dadosEncrypted.data.login}&fileName=${dadosEncrypted.data.fileName}&salt=${dadosEncrypted.salt}&iv=${dadosEncrypted.iv}&hash=${dadosEncrypted.hash}`
+            body: JSON.stringify(dadosEncrypted)
         })
             .then(data => {
                 if (data.status < 300 && data.status >= 200) {
@@ -432,6 +433,7 @@ const sendCompartilhamento = function (e) {
                 }
             })
             .then(retorno => {
+                console.log(retorno)
                 openModalCompartilhar(false, e)
                 checkRespJSONServer(retorno, `Arquivo compartilhado`)
             })

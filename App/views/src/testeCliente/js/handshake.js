@@ -68,19 +68,18 @@ function CryptoJSAESEncryptSC(data) {
 
     var key = CryptoJS.PBKDF2(window.clientkey, salt, { hasher: CryptoJS.algo.SHA512, keySize: 64 / 8, iterations: 999 });
 
-    var loginEncrypted = CryptoJS.AES.encrypt(data.login, key, { iv: iv });
-    var fileNameEncrypted = CryptoJS.AES.encrypt(data.fileName, key, { iv: iv });
+    var nomeDestinatarioEncrypted = CryptoJS.AES.encrypt(data.login, key, { iv: iv });
+    var idArquivoEncrypted = CryptoJS.AES.encrypt(data.fileName, key, { iv: iv });
 
-    const obj = {
-        login: CryptoJS.enc.Base64.stringify(loginEncrypted.ciphertext),
-        fileName: CryptoJS.enc.Base64.stringify(fileNameEncrypted.ciphertext)
-    }
+    const nomeDestinatario = CryptoJS.enc.Base64.stringify(nomeDestinatarioEncrypted.ciphertext)
+    const idArquivo = CryptoJS.enc.Base64.stringify(idArquivoEncrypted.ciphertext)
 
     return {
-        data: obj,
+        nomeDestinatario,
+        idArquivo,
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(JSON.stringify(obj)).toString()
+        hash: CryptoJS.SHA256(JSON.stringify({nomeDestinatario, idArquivo})).toString()
     }
 }
 

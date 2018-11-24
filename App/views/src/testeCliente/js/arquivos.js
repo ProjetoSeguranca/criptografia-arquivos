@@ -125,6 +125,12 @@ const checkRespJSONServer = function (retorno, msg) {
     }
 }
 
+const checkRespJSONServer2 = function (retorno, msg) {
+    alertSend(`<strong>Sucesso! </strong>${msg}`, 'alert-success')
+    openModalLoad(false)
+    return
+}
+
 /**
  * Está função criptografa os arquivos antes de serem enviados ao servidor.
  */
@@ -383,7 +389,7 @@ const transUserToUser = function (idSolicitacao, idArquivo) {
             }
         })
         .then(retorno => {
-            checkRespJSONServer(retorno, `Arquivo compartilhado salvo`)
+            checkRespJSONServer2(retorno, `Arquivo compartilhado salvo`)
             getFilesUser()
         })
         .catch((error) => {

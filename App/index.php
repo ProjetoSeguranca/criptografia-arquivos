@@ -111,6 +111,8 @@ $app->post('/upload',function(){
 	$json = file_get_contents('php://input');
 	$results = json_decode($json,true);
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$_SESSION['teste'] = $results;
+	$_SESSION['chaveAES'] = $chaveAES;
 	$fileName = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']['fileName']);
 	$fileContent = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']['fileContent']);
 	$user = new Users();

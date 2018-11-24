@@ -8,7 +8,6 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="./views/src/testeCliente/js/arquivos.js"></script>
   <script src="./views/src/testeCliente/js/handshake.js"></script>
-  <script src="./views/src/testeCliente/js/download.js"></script>
   <script src="./views/src/testeCliente/crypto-js/crypto-js.js"></script>
   <script src="./views/src/testeCliente/jscriptografia/jsencrypt.min.js"></script>
   <!-- Latest compiled and minified CSS -->

@@ -47,11 +47,6 @@ $app->get('/keyencodeserver',function(Requests $request,Response $response,array
 	
 });
 
-// essa rota foi um teste , não precisa incluir no relatório
-$app->get('/keyencodecliente',function(){
-	var_dump( $_SESSION['optionClient']);
-	});
-
 //pega chave aes cliente e hash da chave e salva em var de sessão
 $app->post('/keyencodecliente',function(){
 
@@ -192,7 +187,17 @@ $app->post('/arquivos/download',function(){
 	$json = file_get_contents('php://input');
 	$results = json_decode($json,true);
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	
 	$idArquivo = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']);
+
+	$hash1 = hash("sha256",$idArquivo ,false);
+	
+	if($results['hash'] != $hash1){
+		return json_encode(array(
+			"msg" => "Falha"
+		));
+	}
+
 	$user = new Users();
 	$data = $user->getFileForId($idArquivo);
 	$dirUser = "./users/".$_SESSION['User']['deslogin'];
@@ -236,11 +241,13 @@ $app->post('/compartilhar/arquivo',function(){
 	if($list != null || $results['hash'] === $hash){
 		$user->sharingRecorder($_SESSION['User']['iduser'], $list, $idarquivo);
 	}
+
 	if($list === null){
 		return json_encode(array(
 			"msg" => "Falha"
 		));
 	}
+
 	return json_encode(array(
 			"msg" => "Sucesso"
 		));
@@ -279,10 +286,17 @@ $app->post('/compartilhar/arquivo/aceitar',function(){
 	$json = file_get_contents('php://input');
 	$results = json_decode($json,true);
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+	$_SESSION['results'] = $results;
+	$_SESSION['chaveAES'] = $chaveAES;
 	$idcompartilhamento = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idCompartilhamento']);
 	$idarquivo = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idArquivo']);
 	$user = new Users();
 	$user->confirmSharing(true, $idcompartilhamento, $idarquivo);
+	//$objeto = $results['idCompartilhamento'].$results['idArquivo'];
+	//$hash = hash("sha256",$objeto ,false);
+	//return json_encode(array(
+	//		"msg" => "Falha"
+	//	));
 	return Users::returnSucess();
 });
 

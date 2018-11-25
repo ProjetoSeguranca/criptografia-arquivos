@@ -78,7 +78,7 @@ function CryptoJSAESEncryptSC(data) {
         idArquivo: idArquivo,
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(JSON.stringify({ nomeDestinatario, idArquivo })).toString()
+        hash: CryptoJS.SHA256(data.nomeDestinatario.concat(data.idArquivo)).toString()
     }
 }
 

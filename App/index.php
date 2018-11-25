@@ -111,13 +111,20 @@ $app->post('/upload',function(){
 	$json = file_get_contents('php://input');
 	$results = json_decode($json,true);
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
+
 	$fileName = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']['fileName']);
 	$fileContent = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['data']['fileContent']);
-	$user = new Users();
-	$data = $user->encryptFile($fileContent, $_SESSION['User']['iduser']);
-	Users::insertFile($fileName , $data, $_SESSION['User']['deslogin']);
-	$_SESSION['data'] = $data;
-	return Users::returnSucess();
+
+	$objeto = $fileContent.$fileName;
+	$hash = hash("sha256",$objeto ,false);
+
+	if($results['hash'] === $hash){
+		$user = new Users();
+		$data = $user->encryptFile($fileContent, $_SESSION['User']['iduser']);
+		Users::insertFile($fileName , $data, $_SESSION['User']['deslogin']);
+		return Users::returnSucess();
+	}
+
 });
 
 
@@ -187,11 +194,15 @@ $app->post('/arquivos/download',function(){
 	$fileCryptJs =  base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$fileDecrypted));
 	$nomeArquivo =  base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$data['fileName']));
 
+	$objeto = $fileDecrypted.$data['fileName'];
+	$hash = hash("sha256",$objeto ,false);
+
 	return json_encode(array(
 		"fileContent"=> $fileCryptJs,
 		"fileName" => $nomeArquivo,
 		"iv"=> $iv,
-		"salt" => $salt
+		"salt" => $salt,
+		"hash" => $hash
 	));
 });
 

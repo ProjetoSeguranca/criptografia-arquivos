@@ -99,7 +99,7 @@ function CryptoJSAESEncryptIDs(idCompartilhamento, idArquivo) {
         idArquivo: idArquivo,
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(JSON.stringify({ idCompartilhamento, idArquivo })).toString()
+        hash: CryptoJS.SHA256(`${idCompartilhamento}`.concat(`${idArquivo}`)).toString()
     }
 }
 
@@ -141,7 +141,7 @@ function CryptoJSAESEncryptId(data) {
         data: CryptoJS.enc.Base64.stringify(dataEncrypted.ciphertext),
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(CryptoJS.enc.Base64.stringify(dataEncrypted.ciphertext)).toString()
+        hash: CryptoJS.SHA256(`${data}`).toString()
     }
 }
 

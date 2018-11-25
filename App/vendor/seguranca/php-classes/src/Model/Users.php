@@ -78,14 +78,6 @@ class Users extends Model{
 		}
 	}
 
-	public static function decryptedForSaveUser($login,$email,$pass,$chaveAES,$salt,$iv){
-		$decryptedLogin = Users::CryptoJSAesDecrypt($chaveAES,$salt ,$iv ,$login);
-		$decryptedPass = Users::CryptoJSAesDecrypt($chaveAES,$salt ,$iv ,$pass);
-		$decryptedEmail = Users::CryptoJSAesDecrypt($chaveAES,$salt ,$iv ,$email);
-		Users::save($decryptedLogin,$decryptedEmail,$decryptedPass);
-
-	}
-
 	public static function returnSucess(){
 		return json_encode(array(
 			"msg" => "Sucesso"

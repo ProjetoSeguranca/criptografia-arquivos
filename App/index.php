@@ -98,11 +98,42 @@ $app->get('/novocadastro',function(){
 	$page->setTpl("cadastro");
 });
 
+
+$app->get("/teste",function(){
+
+	$results = $_SESSION['teste'] ;
+	$chaveAES = $_SESSION['chaveAES'];
+	var_dump($results);
+	$decryptedLogin = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['login']);
+	$decryptedPass = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['pass']);
+	$decryptedEmail = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['email']);
+//	Users::save($decryptedLogin,$decryptedEmail,$decryptedPass);
+
+	$_SESSION['teste'] = $results;
+	$_SESSION['chaveAES'] = $chaveAES;
+	$objeto = $decryptedLogin.$decryptedPass.$decryptedEmail;
+
+	$hash = hash("sha256",$objeto ,false);
+
+	var_dump($hash);
+});
+
 $app->post('/usuario/novo',function(){
 	$json = file_get_contents('php://input');
 	$results = json_decode($json,true);
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
-	Users::decryptedForSaveUser($results['data']['login'],$results['data']['email'],$results['data']['pass'],$chaveAES,$results['salt'],$results['iv']);
+	
+	$decryptedLogin = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['login']);
+	$decryptedPass = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['pass']);
+	$decryptedEmail = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['email']);
+
+	$objeto = $decryptedLogin.$decryptedPass.$decryptedEmail;
+	$hash = hash("sha256",$objeto ,false);
+
+	if($results['hash'] === $hash){
+		Users::save($decryptedLogin,$decryptedEmail,$decryptedPass);
+	}
+
 	return Users::returnSucess();
 });
 

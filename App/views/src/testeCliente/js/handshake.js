@@ -57,7 +57,7 @@ function CryptoJSAESEncryptNewUser(data) {
         data: obj,
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(obj.login.concat(obj.pass).concat(obj.email)).toString()
+        hash: CryptoJS.SHA256(data.login.concat(data.pass).concat(data.email)).toString()
     }
 }
 

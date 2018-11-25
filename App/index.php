@@ -286,17 +286,20 @@ $app->post('/compartilhar/arquivo/aceitar',function(){
 	$json = file_get_contents('php://input');
 	$results = json_decode($json,true);
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
-	$_SESSION['results'] = $results;
-	$_SESSION['chaveAES'] = $chaveAES;
 	$idcompartilhamento = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idCompartilhamento']);
 	$idarquivo = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idArquivo']);
+	
+	$objeto = $idcompartilhamento.$idarquivo;
+	$hash = hash("sha256",$objeto ,false);
+	
+	if($results['hash'] != $hash){
+		return json_encode(array(
+			"msg" => "Falha"
+		));		
+	}
+
 	$user = new Users();
 	$user->confirmSharing(true, $idcompartilhamento, $idarquivo);
-	//$objeto = $results['idCompartilhamento'].$results['idArquivo'];
-	//$hash = hash("sha256",$objeto ,false);
-	//return json_encode(array(
-	//		"msg" => "Falha"
-	//	));
 	return Users::returnSucess();
 });
 
@@ -307,6 +310,16 @@ $app->post('/compartilhar/arquivo/negar',function(){
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
 	$idcompartilhamento = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idCompartilhamento']);
 	$idarquivo = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idArquivo']);
+
+	$objeto = $idcompartilhamento.$idarquivo;
+	$hash = hash("sha256",$objeto ,false);
+	
+	if($results['hash'] != $hash){
+		return json_encode(array(
+			"msg" => "Falha"
+		));		
+	}
+
 	$user = new Users();
 	$user->confirmSharing(false, $idcompartilhamento, $idarquivo);
 	return Users::returnSucess();

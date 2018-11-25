@@ -194,7 +194,7 @@ $app->post('/arquivos/download',function(){
 	$fileCryptJs =  base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$fileDecrypted));
 	$nomeArquivo =  base64_encode($user->CryptoJSAesEncrypt($chaveAES, $salt ,$iv ,$data['fileName']));
 
-	$objeto = $fileDecrypted.$data['fileName'];
+	$objeto = base64_encode($fileDecrypted).$data['fileName'];
 	$hash = hash("sha256",$objeto ,false);
 
 	return json_encode(array(

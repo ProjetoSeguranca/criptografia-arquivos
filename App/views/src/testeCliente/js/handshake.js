@@ -57,7 +57,7 @@ function CryptoJSAESEncryptNewUser(data) {
         data: obj,
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(JSON.stringify(obj)).toString()
+        hash: CryptoJS.SHA256(obj.login.concat(obj.pass).concat(obj.email)).toString()
     }
 }
 
@@ -119,7 +119,7 @@ function CryptoJSAESEncryptFile(data) {
     }
 
     const objHash = data.content.concat(data.fileName)
-    
+
     return {
         data: obj,
         salt: CryptoJS.enc.Hex.stringify(salt),
@@ -208,7 +208,9 @@ const getPublicKey = function (callback1, callback2) {
                     vi = data.vi
                     console.log('Request succeeded to public key')
                     callback1()
-                    callback2()
+                    if (callback2 != undefined) {
+                        callback2()
+                    }
                 });
             }
         )

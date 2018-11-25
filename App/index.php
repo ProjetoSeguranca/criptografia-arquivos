@@ -98,26 +98,6 @@ $app->get('/novocadastro',function(){
 	$page->setTpl("cadastro");
 });
 
-
-$app->get("/teste",function(){
-
-	$results = $_SESSION['teste'] ;
-	$chaveAES = $_SESSION['chaveAES'];
-	var_dump($results);
-	$decryptedLogin = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['login']);
-	$decryptedPass = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['pass']);
-	$decryptedEmail = Users::CryptoJSAesDecrypt($chaveAES,$results['salt'] ,$results['iv'] ,$results['data']['email']);
-//	Users::save($decryptedLogin,$decryptedEmail,$decryptedPass);
-
-	$_SESSION['teste'] = $results;
-	$_SESSION['chaveAES'] = $chaveAES;
-	$objeto = $decryptedLogin.$decryptedPass.$decryptedEmail;
-
-	$hash = hash("sha256",$objeto ,false);
-
-	var_dump($hash);
-});
-
 $app->post('/usuario/novo',function(){
 	$json = file_get_contents('php://input');
 	$results = json_decode($json,true);
@@ -237,7 +217,6 @@ $app->post('/arquivos/download',function(){
 	));
 });
 
-
 $app->post('/compartilhar/arquivo',function(){
 	Users::verifyLogin();
 	$user = new Users();
@@ -245,11 +224,16 @@ $app->post('/compartilhar/arquivo',function(){
 	$results = json_decode($json,true);
 	
 	$chaveAES = Users::privateKeyDecrypt($_SESSION['optionClient'], $_SESSION['optionPrivate']);
-
+	$_SESSION['results'] = $results;
+	$_SESSION['chaveAES'] = $chaveAES;
 	$nome = Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['nomeDestinatario']);
 	$idarquivo =  Users::CryptoJSAesDecrypt($chaveAES, $results['salt'] , $results['iv'] ,$results['idArquivo']);
 	$list = $user->getUserForDeslogin($nome); 
-	if($list != null){
+
+	$objeto = $nome.$idarquivo;
+	$hash = hash("sha256",$objeto ,false);
+
+	if($list != null || $results['hash'] === $hash){
 		$user->sharingRecorder($_SESSION['User']['iduser'], $list, $idarquivo);
 	}
 	if($list === null){

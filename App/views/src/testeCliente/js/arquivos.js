@@ -274,20 +274,23 @@ const downloadFile = function (id) {
 const construirArquivo = function (data) {
     const decryptedFileContent = CryptoJSAesDecryptFile(data.resp.fileContent, data.resp.salt, data.resp.iv)
     const decryptedFileName = CryptoJSAesDecrypt(data.resp.fileName, data.resp.salt, data.resp.iv)
+    const hash = CryptoJS.SHA256(decryptedFileContent.concat(decryptedFileName)).toString()
 
-    const dataURL = `data:application/octet-stream;base64,${decryptedFileContent}`
-
-    const elementLink = document.createElement("a")
-    elementLink.download = decryptedFileName
-    elementLink.target = '_blank'
-    elementLink.href = dataURL
-
-    document.body.appendChild(elementLink)
-
-    elementLink.click()
-
-    document.body.removeChild(elementLink);
-    delete elementLink;
+    if (hash === data.resp.hash) {
+        const dataURL = `data:application/octet-stream;base64,${decryptedFileContent}`
+        const elementLink = document.createElement("a")
+        elementLink.download = decryptedFileName
+        elementLink.target = '_blank'
+        elementLink.href = dataURL
+        document.body.appendChild(elementLink)
+        elementLink.click()
+        document.body.removeChild(elementLink);
+        delete elementLink;
+    } else {
+        const msg = 'O arquivo foi corrompido enquanto estava sendo baixado. Tente novamente.'
+        console.log(msg)
+        alertSend(`<strong>Erro! </strong>${msg}`, 'alert-danger')
+    }
 }
 
 const insetDataFilesTable = function (files) {

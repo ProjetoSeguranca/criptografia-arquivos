@@ -118,16 +118,13 @@ function CryptoJSAESEncryptFile(data) {
         fileName: CryptoJS.enc.Base64.stringify(fileNameEncrypted.ciphertext)
     }
 
-    const objHash = {
-        fileContent: data.content,
-        fileName: data.fileName
-    }
-
+    const objHash = data.content.concat(data.fileName)
+    
     return {
         data: obj,
         salt: CryptoJS.enc.Hex.stringify(salt),
         iv: CryptoJS.enc.Hex.stringify(iv),
-        hash: CryptoJS.SHA256(JSON.stringify(objHash)).toString()
+        hash: CryptoJS.SHA256(objHash).toString()
     }
 }
 
